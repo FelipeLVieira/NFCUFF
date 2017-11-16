@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "385914252669",
+    "firebase_url": "https://nfcuff-b327e.firebaseio.com",
+    "project_id": "nfcuff-b327e",
+    "storage_bucket": "nfcuff-b327e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:385914252669:android:797f8c3f9121bbda",
+        "android_client_info": {
+          "package_name": "com.example.nfc.nfcuff"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "385914252669-rhp9vnvn5bm13pl44ppt8gi416utbrkr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.nfc.nfcuff",
+            "certificate_hash": "f30a08f46a25460586f23bb757116f5f60b46f31"
+          }
+        },
+        {
+          "client_id": "385914252669-ud6b58g7ivji9d9shn3c6hkfn8kko9nc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlrtzJNW9Ct7uLDpa3zRJ9Hf6V2fkyKcE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "385914252669-ud6b58g7ivji9d9shn3c6hkfn8kko9nc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
