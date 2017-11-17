@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "385914252669",
-    "firebase_url": "https://nfcuff-b327e.firebaseio.com",
-    "project_id": "nfcuff-b327e",
-    "storage_bucket": "nfcuff-b327e.appspot.com"
+    "project_number": "29084522320",
+    "firebase_url": "https://nfc-tcc.firebaseio.com",
+    "project_id": "nfc-tcc",
+    "storage_bucket": "nfc-tcc.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:385914252669:android:797f8c3f9121bbda",
+        "mobilesdk_app_id": "1:29084522320:android:797f8c3f9121bbda",
         "android_client_info": {
           "package_name": "com.example.nfc.nfcuff"
         }
       },
       "oauth_client": [
         {
-          "client_id": "385914252669-rhp9vnvn5bm13pl44ppt8gi416utbrkr.apps.googleusercontent.com",
+          "client_id": "29084522320-fiuci44arh1v1bpohna4uqskfobcklh7.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.nfc.nfcuff",
@@ -23,13 +23,13 @@
           }
         },
         {
-          "client_id": "385914252669-ud6b58g7ivji9d9shn3c6hkfn8kko9nc.apps.googleusercontent.com",
+          "client_id": "29084522320-qjk35483273v490fqjqte4emlki1isnh.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBlrtzJNW9Ct7uLDpa3zRJ9Hf6V2fkyKcE"
+          "current_key": "AIzaSyAkXZu85azsngGse8FGh2Xpo2ScHhAr758"
         }
       ],
       "services": {
@@ -40,7 +40,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "385914252669-ud6b58g7ivji9d9shn3c6hkfn8kko9nc.apps.googleusercontent.com",
+              "client_id": "29084522320-qjk35483273v490fqjqte4emlki1isnh.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
