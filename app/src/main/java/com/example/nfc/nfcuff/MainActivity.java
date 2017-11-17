@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance().getReference("leituras");
 
-        database.push().setValue(leituraObj);
+        database.setValue(leituraObj);
     }
 
     private String bytesToHexString(byte[] src) {
