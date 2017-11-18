@@ -34,6 +34,26 @@ public class LeituraNFC {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
     }
 
+    public LeituraNFC(String tagID, String tagContent, String tagAction, String deviceGPSCoordinates, String deviceAddress, String buildVersionDevice, String buildSerial, String buildModel, String buildID, String buildManufacturer, String buildBrand, String buildType, String buildUser, String buildVersionSDK, String buildBoard, String buildFingerprint, String buildVersionRelease) {
+        this.tagID = tagID;
+        this.tagContent = tagContent;
+        this.tagAction = tagAction;
+        this.deviceGPSCoordinates = deviceGPSCoordinates;
+        this.deviceAddress = deviceAddress;
+        this.buildVersionDevice = buildVersionDevice;
+        this.buildSerial = buildSerial;
+        this.buildModel = buildModel;
+        this.buildID = buildID;
+        this.buildManufacturer = buildManufacturer;
+        this.buildBrand = buildBrand;
+        this.buildType = buildType;
+        this.buildUser = buildUser;
+        this.buildVersionSDK = buildVersionSDK;
+        this.buildBoard = buildBoard;
+        this.buildFingerprint = buildFingerprint;
+        this.buildVersionRelease = buildVersionRelease;
+    }
+
     public String getTagID() {
         return tagID;
     }

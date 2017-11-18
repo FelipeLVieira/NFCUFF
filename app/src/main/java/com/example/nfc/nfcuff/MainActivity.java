@@ -37,7 +37,6 @@ public class MainActivity extends AppCompatActivity {
     private PendingIntent mPendingIntent;
     private IntentFilter[] mIntentFilters;
     private String[][] mNFCTechLists;
-    private DatabaseReference database;
 
 
     @Override
@@ -45,9 +44,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedState);
         setContentView(R.layout.activity_main);
 
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+
         textView1 = findViewById(R.id.tv);
 
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
+        mNfcAdapter.disableReaderMode(this);
 
         //Validar se o dispositivo possui suporte a NFC
         if (mNfcAdapter != null) {
@@ -70,7 +73,28 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mNFCTechLists = new String[][]{new String[]{NfcF.class.getName()}};
+
+        salvarInformacoesNoFirebase("", null , "");
     }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (mNfcAdapter != null)
+            mNfcAdapter.enableForegroundDispatch(this, mPendingIntent, mIntentFilters, mNFCTechLists);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if (mNfcAdapter != null)
+            mNfcAdapter.disableForegroundDispatch(this);
+    }
+
+
 
     @Override
     public void onNewIntent(Intent intent) {
@@ -103,45 +127,32 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("TagDispatch", e.toString());
             }
         }
+
         salvarInformacoesNoFirebase(s, tag, action);
 
         textView1.setText(s);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        if (mNfcAdapter != null)
-            mNfcAdapter.enableForegroundDispatch(this, mPendingIntent, mIntentFilters, mNFCTechLists);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        if (mNfcAdapter != null)
-            mNfcAdapter.disableForegroundDispatch(this);
-    }
 
     public void salvarInformacoesNoFirebase(String tagContent, Tag tagNFC, String tagAction) {
-        String tagNFCString = bytesToHexString(tagNFC.getId());
+        //String tagNFCString = bytesToHexString(tagNFC.getId());
+        //CoordenadasGPS coordenadasGPS = getCoordenadasGPS();
+        //String endereco = getEndereco(coordenadasGPS.getLatitude(), coordenadasGPS.getLongitude());
 
-        CoordenadasGPS coordenadasGPS = getCoordenadasGPS();
-        String endereco = getEndereco(coordenadasGPS.getLatitude(), coordenadasGPS.getLongitude());
+        LeituraNFC leitura = new LeituraNFC();
 
-        LeituraNFC leituraObj = new LeituraNFC();
+        //leitura.setTagID(tagNFCString);
+        leitura.setTagContent(tagContent);
+        leitura.setTagAction(tagAction);
 
-        leituraObj.setTagID(tagNFCString);
-        leituraObj.setTagContent(tagContent);
-        leituraObj.setTagAction(tagAction);
+        leitura.setBuildID(Build.ID);
 
-        leituraObj.setBuildID(Build.ID);
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference("leituras");
 
-        database = FirebaseDatabase.getInstance().getReference("leituras");
+        database.setValue(leitura);
 
-        database.setValue(leituraObj);
     }
+
 
     private String bytesToHexString(byte[] src) {
         StringBuilder stringBuilder = new StringBuilder("0x");
