@@ -14,13 +14,13 @@ import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.NfcF;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -44,13 +44,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedState);
         setContentView(R.layout.activity_main);
 
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        Toast.makeText(this,
+                "onCreate()",
+                    Toast.LENGTH_SHORT).show();
 
         textView1 = findViewById(R.id.tv);
 
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
-
-        mNfcAdapter.disableReaderMode(this);
 
         //Validar se o dispositivo possui suporte a NFC
         if (mNfcAdapter != null) {
@@ -74,16 +74,54 @@ public class MainActivity extends AppCompatActivity {
 
         mNFCTechLists = new String[][]{new String[]{NfcF.class.getName()}};
 
-        salvarInformacoesNoFirebase("", null , "");
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        //salvarInformacoesNoFirebase("", null , "");
     }
 
 
     @Override
-    public void onResume() {
+    protected void onResume() {
         super.onResume();
 
-        if (mNfcAdapter != null)
-            mNfcAdapter.enableForegroundDispatch(this, mPendingIntent, mIntentFilters, mNFCTechLists);
+        Intent intent = getIntent();
+        String action = intent.getAction();
+
+        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
+            Toast.makeText(this,
+                    "onResume() - ACTION_TAG_DISCOVERED",
+                    Toast.LENGTH_SHORT).show();
+
+            Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+            if (tag == null) {
+                textView1.setText("tag == null");
+            } else {
+                String tagInfo = tag.toString() + "\n";
+
+                tagInfo += "\nTag Id: \n";
+                byte[] tagId = tag.getId();
+                tagInfo += "length = " + tagId.length + "\n";
+                for (int i = 0; i < tagId.length; i++) {
+                    tagInfo += Integer.toHexString(tagId[i] & 0xFF) + " ";
+                }
+                tagInfo += "\n";
+
+                String[] techList = tag.getTechList();
+                tagInfo += "\nTech List\n";
+                tagInfo += "length = " + techList.length + "\n";
+                for (int i = 0; i < techList.length; i++) {
+                    tagInfo += techList[i] + "\n ";
+                }
+
+                salvarInformacoesNoFirebase("", null, "");
+
+                textView1.setText(tagInfo);
+            }
+        } else {
+            Toast.makeText(this,
+                    "onResume() : " + action,
+                    Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     @Override
@@ -95,9 +133,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     @Override
     public void onNewIntent(Intent intent) {
+
+        Toast.makeText(this,
+                "onNewIntent()",
+                Toast.LENGTH_SHORT).show();
 
         String action = intent.getAction();
         Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
@@ -135,17 +176,16 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void salvarInformacoesNoFirebase(String tagContent, Tag tagNFC, String tagAction) {
+
+        Toast.makeText(this,
+                "salvarInformacoesNoFirebase()",
+                Toast.LENGTH_SHORT).show();
+
         //String tagNFCString = bytesToHexString(tagNFC.getId());
         //CoordenadasGPS coordenadasGPS = getCoordenadasGPS();
         //String endereco = getEndereco(coordenadasGPS.getLatitude(), coordenadasGPS.getLongitude());
 
         LeituraNFC leitura = new LeituraNFC();
-
-        //leitura.setTagID(tagNFCString);
-        leitura.setTagContent(tagContent);
-        leitura.setTagAction(tagAction);
-
-        leitura.setBuildID(Build.ID);
 
         DatabaseReference database = FirebaseDatabase.getInstance().getReference("leituras");
 

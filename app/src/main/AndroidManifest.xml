@@ -16,21 +16,22 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        >
-        <activity android:name="MainActivity"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name="MainActivity"
             android:launchMode="singleTask">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
+                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
 
-                <action android:name="android.nfc.action.TAG_DISCOVERED" />
-
-                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+            </intent-filter>
+            <intent-filter>
 
                 <category android:name="android.intent.category.DEFAULT" />
 
+                <!--<action android:name="android.nfc.action.TAG_DISCOVERED" />-->
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
                 <data android:mimeType="text/plain" />
 
             </intent-filter>
