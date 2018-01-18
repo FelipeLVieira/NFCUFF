@@ -1,5 +1,6 @@
 package com.example.nfc.nfcuff;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -9,13 +10,10 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
-import android.nfc.NdefMessage;
-import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
-import android.nfc.tech.NfcF;
+import android.nfc.tech.Ndef;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -26,7 +24,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -34,9 +31,8 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView textView1;
     private NfcAdapter mNfcAdapter;
-    private PendingIntent mPendingIntent;
-    private IntentFilter[] mIntentFilters;
-    private String[][] mNFCTechLists;
+    public static final String MIME_TEXT_PLAIN = "text/plain";
+    public static final String TAG = "NfcDemo";
 
 
     @Override
@@ -46,36 +42,21 @@ public class MainActivity extends AppCompatActivity {
 
         Toast.makeText(this,
                 "onCreate()",
-                    Toast.LENGTH_SHORT).show();
+                Toast.LENGTH_SHORT).show();
 
         textView1 = findViewById(R.id.tv);
+
 
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
         //Validar se o dispositivo possui suporte a NFC
-        if (mNfcAdapter != null) {
-            textView1.setText("Dispositivo apto a ler uma tag NFC.");
+        if (mNfcAdapter != null && mNfcAdapter.isEnabled()) {
+            textView1.setText("Dispositivo está apto a ler uma tag NFC.");
         } else {
             textView1.setText("Este dispositivo não está habilitado para leitura de NFC.");
         }
 
-        // create an intent with tag data and deliver to this activity
-        mPendingIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-
-        // set an intent filter for all MIME data
-        IntentFilter ndefIntent = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
-        try {
-            ndefIntent.addDataType("*/*");
-            mIntentFilters = new IntentFilter[]{ndefIntent};
-        } catch (Exception e) {
-            Log.e("TagDispatch", e.toString());
-        }
-
-        mNFCTechLists = new String[][]{new String[]{NfcF.class.getName()}};
-
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-        //salvarInformacoesNoFirebase("", null , "");
+        handleIntent(getIntent());
     }
 
 
@@ -83,64 +64,77 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        Intent intent = getIntent();
-        String action = intent.getAction();
+        Toast.makeText(this,
+                "onResume()",
+                Toast.LENGTH_SHORT).show();
 
-        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
-            Toast.makeText(this,
-                    "onResume() - ACTION_TAG_DISCOVERED",
-                    Toast.LENGTH_SHORT).show();
-
-            Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-            if (tag == null) {
-                textView1.setText("tag == null");
-            } else {
-                String tagInfo = tag.toString() + "\n";
-
-                tagInfo += "\nTag Id: \n";
-                byte[] tagId = tag.getId();
-                tagInfo += "length = " + tagId.length + "\n";
-                for (int i = 0; i < tagId.length; i++) {
-                    tagInfo += Integer.toHexString(tagId[i] & 0xFF) + " ";
-                }
-                tagInfo += "\n";
-
-                String[] techList = tag.getTechList();
-                tagInfo += "\nTech List\n";
-                tagInfo += "length = " + techList.length + "\n";
-                for (int i = 0; i < techList.length; i++) {
-                    tagInfo += techList[i] + "\n ";
-                }
-
-                salvarInformacoesNoFirebase("", null, "");
-
-                textView1.setText(tagInfo);
-            }
-        } else {
-            Toast.makeText(this,
-                    "onResume() : " + action,
-                    Toast.LENGTH_SHORT).show();
-        }
-
+        /**
+         * It's important, that the activity is in the foreground (resumed). Otherwise
+         * an IllegalStateException is thrown.
+         */
+        setupForegroundDispatch(this, mNfcAdapter);
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        if (mNfcAdapter != null)
-            mNfcAdapter.disableForegroundDispatch(this);
+        Toast.makeText(this,
+                "onPause()",
+                Toast.LENGTH_SHORT).show();
+
+        /**
+         * Call this before onPause, otherwise an IllegalArgumentException is thrown as well.
+         */
+        stopForegroundDispatch(this, mNfcAdapter);
+
+        super.onPause();
     }
 
 
     @Override
     public void onNewIntent(Intent intent) {
-
         Toast.makeText(this,
                 "onNewIntent()",
                 Toast.LENGTH_SHORT).show();
 
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+
+        Toast.makeText(this,
+                "handleIntent()",
+                Toast.LENGTH_SHORT).show();
+
         String action = intent.getAction();
+        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
+
+            String type = intent.getType();
+            if (MIME_TEXT_PLAIN.equals(type)) {
+
+                Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+                new NdefReaderTask().execute(tag);
+
+            } else {
+                Log.d(TAG, "Wrong mime type: " + type);
+            }
+        } else if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(action)) {
+
+            // In case we would still use the Tech Discovered Intent
+            Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+            String[] techList = tag.getTechList();
+            String searchedTech = Ndef.class.getName();
+
+            for (String tech : techList) {
+                if (searchedTech.equals(tech)) {
+                    new NdefReaderTask().execute(tag);
+                    break;
+                }
+            }
+        }
+
+        /*String action = intent.getAction();
         Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 
         String s = action + "\n\n" + tag.toString();
@@ -171,11 +165,38 @@ public class MainActivity extends AppCompatActivity {
 
         salvarInformacoesNoFirebase(s, tag, action);
 
-        textView1.setText(s);
+        textView1.setText(s);*/
     }
 
+    public static void setupForegroundDispatch(final Activity activity, NfcAdapter adapter) {
+        final Intent intent = new Intent(activity.getApplicationContext(), activity.getClass());
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        final PendingIntent pendingIntent = PendingIntent.getActivity(activity.getApplicationContext(), 0, intent, 0);
+
+        IntentFilter[] filters = new IntentFilter[1];
+        String[][] techList = new String[][]{};
+
+        // Notice that this is the same filter as in our manifest.
+        filters[0] = new IntentFilter();
+        filters[0].addAction(NfcAdapter.ACTION_NDEF_DISCOVERED);
+        filters[0].addCategory(Intent.CATEGORY_DEFAULT);
+        try {
+            filters[0].addDataType(MIME_TEXT_PLAIN);
+        } catch (IntentFilter.MalformedMimeTypeException e) {
+            throw new RuntimeException("Check your mime type.");
+        }
+
+        adapter.enableForegroundDispatch(activity, pendingIntent, filters, techList);
+    }
+
+    public static void stopForegroundDispatch(final Activity activity, NfcAdapter adapter) {
+        adapter.disableForegroundDispatch(activity);
+    }
 
     public void salvarInformacoesNoFirebase(String tagContent, Tag tagNFC, String tagAction) {
+
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         Toast.makeText(this,
                 "salvarInformacoesNoFirebase()",
@@ -223,8 +244,7 @@ public class MainActivity extends AppCompatActivity {
                 builder.append(addressStr);
                 builder.append(" ");
             }
-            String fnialAddress;
-            return fnialAddress = builder.toString(); //This is the complete address.
+            return builder.toString(); //This is the complete address.
         } catch (IOException | NullPointerException e) {
         }
 
@@ -260,5 +280,4 @@ public class MainActivity extends AppCompatActivity {
         }
         return null;
     }
-
 }
