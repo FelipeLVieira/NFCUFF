@@ -1,10 +1,7 @@
 package com.example.nfc.nfcuff;
 
-import android.app.Activity;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -12,11 +9,9 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
-import android.nfc.tech.Ndef;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +25,9 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
 
     private TextView textView1;
-    private NfcAdapter mNfcAdapter;
+    private TextView txtTagContent;
+    private NfcAdapter nfcAdapter;
+    private NFCManager nfcManager;
     public static final String MIME_TEXT_PLAIN = "text/plain";
     public static final String TAG = "NfcDemo";
 
@@ -44,19 +41,28 @@ public class MainActivity extends AppCompatActivity {
                 "onCreate()",
                 Toast.LENGTH_SHORT).show();
 
+        //Views
         textView1 = findViewById(R.id.tv);
+        txtTagContent = findViewById(R.id.txtTagConent);
 
+        //Adapter
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
-        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        //Manager
+        nfcManager = new NFCManager(this);
 
         //Validar se o dispositivo possui suporte a NFC
-        if (mNfcAdapter != null && mNfcAdapter.isEnabled()) {
-            textView1.setText("Dispositivo está apto a ler uma tag NFC.");
-        } else {
-            textView1.setText("Este dispositivo não está habilitado para leitura de NFC.");
+        try {
+            nfcManager.verifyNFC();
+            txtTagContent.setText("Dispositivo está apto a ler uma tag NFC.");
+        }
+        catch(NFCManager.NFCNotSupported nfcnsup) {
+            txtTagContent.setText("Dispositivo está apto a ler uma tag NFC.");
+        }
+        catch(NFCManager.NFCNotEnabled nfcnEn) {
+            txtTagContent.setText("Este dispositivo não está habilitado para leitura de NFC.");
         }
 
-        handleIntent(getIntent());
     }
 
 
@@ -68,32 +74,34 @@ public class MainActivity extends AppCompatActivity {
                 "onResume()",
                 Toast.LENGTH_SHORT).show();
 
-        /**
-         * It's important, that the activity is in the foreground (resumed). Otherwise
-         * an IllegalStateException is thrown.
-         */
-        setupForegroundDispatch(this, mNfcAdapter);
+        try {
+            nfcManager.verifyNFC();
+            nfcManager.setupForegroundDispatch(this);
+        }
+        catch(NFCManager.NFCNotSupported nfcnsup) {
+            txtTagContent.setText("Dispositivo está apto a ler uma tag NFC.");
+        }
+        catch(NFCManager.NFCNotEnabled nfcnEn) {
+            txtTagContent.setText("Este dispositivo não está habilitado para leitura de NFC.");
+        }
     }
 
     @Override
-    public void onPause() {
+    protected void onPause() {
         super.onPause();
 
         Toast.makeText(this,
                 "onPause()",
                 Toast.LENGTH_SHORT).show();
 
-        /**
-         * Call this before onPause, otherwise an IllegalArgumentException is thrown as well.
-         */
-        stopForegroundDispatch(this, mNfcAdapter);
-
-        super.onPause();
+        nfcManager.disableDispatch();
     }
 
 
     @Override
     public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
         Toast.makeText(this,
                 "onNewIntent()",
                 Toast.LENGTH_SHORT).show();
@@ -107,92 +115,36 @@ public class MainActivity extends AppCompatActivity {
                 "handleIntent()",
                 Toast.LENGTH_SHORT).show();
 
-        String action = intent.getAction();
+        /*String action = intent.getAction();
+
+
         if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
 
             String type = intent.getType();
             if (MIME_TEXT_PLAIN.equals(type)) {
 
                 Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-                new NdefReaderTask().execute(tag);
+                new AsyncNdefReaderTask().execute(tag);
 
             } else {
                 Log.d(TAG, "Wrong mime type: " + type);
             }
         } else if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(action)) {
 
-            // In case we would still use the Tech Discovered Intent
             Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
             String[] techList = tag.getTechList();
             String searchedTech = Ndef.class.getName();
 
             for (String tech : techList) {
                 if (searchedTech.equals(tech)) {
-                    new NdefReaderTask().execute(tag);
+                    new AsyncNdefReaderTask().execute(tag);
                     break;
                 }
             }
-        }
-
-        /*String action = intent.getAction();
-        Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-
-        String s = action + "\n\n" + tag.toString();
-
-        // parse through all NDEF messages and their records and pick text type only
-        Parcelable[] data = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
-        if (data != null) {
-            try {
-                for (int i = 0; i < data.length; i++) {
-                    NdefRecord[] recs = ((NdefMessage) data[i]).getRecords();
-                    for (int j = 0; j < recs.length; j++) {
-                        if (recs[j].getTnf() == NdefRecord.TNF_WELL_KNOWN &&
-                                Arrays.equals(recs[j].getType(), NdefRecord.RTD_TEXT)) {
-                            byte[] payload = recs[j].getPayload();
-                            String textEncoding = ((payload[0] & 0200) == 0) ? "UTF-8" : "UTF-16";
-                            int langCodeLen = payload[0] & 0077;
-
-                            s += ("\n\nNdefMessage[" + i + "], NdefRecord[" + j + "]:\n\"" +
-                                    new String(payload, langCodeLen + 1, payload.length - langCodeLen - 1,
-                                            textEncoding) + "\"");
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                Log.e("TagDispatch", e.toString());
-            }
-        }
-
-        salvarInformacoesNoFirebase(s, tag, action);
-
-        textView1.setText(s);*/
+        }*/
     }
 
-    public static void setupForegroundDispatch(final Activity activity, NfcAdapter adapter) {
-        final Intent intent = new Intent(activity.getApplicationContext(), activity.getClass());
-        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-        final PendingIntent pendingIntent = PendingIntent.getActivity(activity.getApplicationContext(), 0, intent, 0);
-
-        IntentFilter[] filters = new IntentFilter[1];
-        String[][] techList = new String[][]{};
-
-        // Notice that this is the same filter as in our manifest.
-        filters[0] = new IntentFilter();
-        filters[0].addAction(NfcAdapter.ACTION_NDEF_DISCOVERED);
-        filters[0].addCategory(Intent.CATEGORY_DEFAULT);
-        try {
-            filters[0].addDataType(MIME_TEXT_PLAIN);
-        } catch (IntentFilter.MalformedMimeTypeException e) {
-            throw new RuntimeException("Check your mime type.");
-        }
-
-        adapter.enableForegroundDispatch(activity, pendingIntent, filters, techList);
-    }
-
-    public static void stopForegroundDispatch(final Activity activity, NfcAdapter adapter) {
-        adapter.disableForegroundDispatch(activity);
-    }
 
     public void salvarInformacoesNoFirebase(String tagContent, Tag tagNFC, String tagAction) {
 

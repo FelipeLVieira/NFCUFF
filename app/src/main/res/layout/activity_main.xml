@@ -7,10 +7,10 @@
     tools:context="com.example.nfc.nfcuff.MainActivity">
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/txtTagConent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:text="Conteúdo da Tag"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
