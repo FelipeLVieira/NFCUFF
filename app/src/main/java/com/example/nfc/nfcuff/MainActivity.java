@@ -7,11 +7,13 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -115,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
                 "handleIntent()",
                 Toast.LENGTH_SHORT).show();
 
+        txtTagContent.setText(nfcManager.readFromTag(intent));
         /*String action = intent.getAction();
 
 
@@ -123,24 +126,17 @@ public class MainActivity extends AppCompatActivity {
             String type = intent.getType();
             if (MIME_TEXT_PLAIN.equals(type)) {
 
-                Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-                new AsyncNdefReaderTask().execute(tag);
+                NdefMessage ndefMessage = nfcManager.getNdefMessageFromIntent(intent);
+
+                txtTagContent.setText(nfcManager.readTextFromNdefMessage(ndefMessage));
 
             } else {
                 Log.d(TAG, "Wrong mime type: " + type);
             }
         } else if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(action)) {
 
-            Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-            String[] techList = tag.getTechList();
-            String searchedTech = Ndef.class.getName();
-
-            for (String tech : techList) {
-                if (searchedTech.equals(tech)) {
-                    new AsyncNdefReaderTask().execute(tag);
-                    break;
-                }
-            }
+            NdefMessage ndefMessage = nfcManager.getExtraNdefMessageFromIntent(intent);
+            txtTagContent.setText(nfcManager.readTextFromNdefMessage(ndefMessage));
         }*/
     }
 

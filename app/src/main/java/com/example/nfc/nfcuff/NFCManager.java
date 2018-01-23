@@ -22,23 +22,25 @@ package com.example.nfc.nfcuff;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NdefFormatable;
+import android.os.Parcelable;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Locale;
 
 public class NFCManager {
 
     private Activity activity;
-    private NfcAdapter nfcAdpt;
+    private NfcAdapter nfcAdapter;
 
     public NFCManager(Activity activity) {
         this.activity = activity;
@@ -46,12 +48,12 @@ public class NFCManager {
 
     public void verifyNFC() throws NFCNotSupported, NFCNotEnabled {
 
-        nfcAdpt = NfcAdapter.getDefaultAdapter(activity);
+        nfcAdapter = NfcAdapter.getDefaultAdapter(activity);
 
-        if (nfcAdpt == null)
+        if (nfcAdapter == null)
             throw new NFCNotSupported();
 
-        if (!nfcAdpt.isEnabled())
+        if (!nfcAdapter.isEnabled())
             throw new NFCNotEnabled();
 
     }
@@ -61,14 +63,12 @@ public class NFCManager {
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, intent, 0);
-        IntentFilter[] intentFiltersArray = new IntentFilter[] {};
-        String[][] techList = new String[][] { { android.nfc.tech.Ndef.class.getName() }, { android.nfc.tech.NdefFormatable.class.getName() } };
 
-        nfcAdpt.enableForegroundDispatch(activity, pendingIntent, intentFiltersArray, techList);
+        nfcAdapter.enableForegroundDispatch(activity, pendingIntent, null, null);
     }
 
     public void disableDispatch() {
-        nfcAdpt.disableForegroundDispatch(activity);
+        nfcAdapter.disableForegroundDispatch(activity);
     }
 
     public static class NFCNotSupported extends Exception {
@@ -197,4 +197,89 @@ public class NFCManager {
         return false;
     }
 
+    public Tag getTagFromIntent(Intent intent) {
+        return (Tag)intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+    }
+
+    public NdefMessage getExtraNdefMessageFromIntent(Intent intent) {
+        NdefMessage ndefMessage = null;
+        Parcelable[] extra = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+        if (extra != null && extra.length > 0) {
+            ndefMessage = (NdefMessage) extra[0];
+        }
+        return ndefMessage;
+    }
+
+    public NdefRecord getFirstNdefRecord(NdefMessage ndefMessage) {
+        NdefRecord ndefRecord = null;
+        NdefRecord[] ndefRecords = ndefMessage.getRecords();
+        if (ndefRecords != null && ndefRecords.length > 0) {
+            ndefRecord = ndefRecords[0];
+        }
+        return ndefRecord;
+    }
+
+    public boolean isNdefRecordOfTnfAndRdt(NdefRecord ndefRecord, short tnf, byte[] rdt) {
+        return ndefRecord.getTnf() == tnf && Arrays.equals(ndefRecord.getType(), rdt);
+    }
+
+    public String readTagFromCache(Tag tag){
+        Ndef ndef = Ndef.get(tag);
+        if (ndef == null) {
+            return "NDEF is not supported by this Tag!";
+        }
+
+        NdefMessage ndefMessage = ndef.getCachedNdefMessage();
+
+        if (ndefMessage == null) {
+            return "The tag is empty !";
+        }
+
+        NdefRecord[] records = ndefMessage.getRecords();
+        for (NdefRecord ndefRecord : records) {
+            if (ndefRecord.getTnf() == NdefRecord.TNF_WELL_KNOWN && Arrays.equals(ndefRecord.getType(), NdefRecord.RTD_TEXT)) {
+                try {
+                    return getTextFromNdefRecord(ndefRecord);
+                } catch (Exception e) {
+                }
+            }
+        }
+        return "";
+    }
+
+    public String readFromTag(Intent intent){
+        Ndef ndef = Ndef.get(getTagFromIntent(intent));
+
+        String txtTagContent = "";
+
+        try{
+            ndef.connect();
+
+            txtTagContent += "Type: " + ndef.getType().toString() + "\n";
+            txtTagContent += "Size: " + String.valueOf(ndef.getMaxSize()) + "\n";
+            txtTagContent += "Writable: " + (ndef.isWritable() ? "True" : "False") + "\n";
+
+            Parcelable[] messages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+
+            if (messages != null) {
+                NdefMessage[] ndefMessages = new NdefMessage[messages.length];
+                for (int i = 0; i < messages.length; i++) {
+                    ndefMessages[i] = (NdefMessage) messages[i];
+                }
+                NdefRecord record = ndefMessages[0].getRecords()[0];
+
+                byte[] payload = record.getPayload();
+                String text = new String(payload);
+                txtTagContent += "Content: " + text + "\n";
+
+
+                ndef.close();
+
+            }
+        }
+        catch (Exception e) {
+            Toast.makeText(null, "Cannot Read From Tag.", Toast.LENGTH_LONG).show();
+        }
+        return txtTagContent;
+    }
 }
