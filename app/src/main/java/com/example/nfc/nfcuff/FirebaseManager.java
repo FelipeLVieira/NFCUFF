@@ -19,7 +19,7 @@ public class FirebaseManager {
         this.activity = activity;
     }
 
-    public void salvarInformacoesNoFirebase(String tagContent, Tag tagNFC, String tagAction) {
+    public void salvarInformacoesNoFirebase(String tagContent) {
 
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
@@ -27,15 +27,9 @@ public class FirebaseManager {
                 "salvarInformacoesNoFirebase()",
                 Toast.LENGTH_SHORT).show();
 
-        String tagNFCString = bytesToHexString(tagNFC.getId());
-        //CoordenadasGPS coordenadasGPS = getCoordenadasGPS();
-        //String endereco = getEndereco(coordenadasGPS.getLatitude(), coordenadasGPS.getLongitude());
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference("valor");
 
-        LeituraNFC leitura = new LeituraNFC();
-
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference("leituras");
-
-        database.setValue(leitura);
+        database.setValue(tagContent);
 
     }
 

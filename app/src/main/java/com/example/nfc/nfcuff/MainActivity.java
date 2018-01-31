@@ -1,15 +1,13 @@
 package com.example.nfc.nfcuff;
 
 import android.content.Intent;
-import android.location.Address;
-import android.location.Geocoder;
+import android.location.LocationManager;
 import android.nfc.NfcAdapter;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,16 +15,14 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = "NfcDemo";
     private TextView textView1;
     private TextView txtTagContent;
-    private TextView txtAddress;
     private NfcAdapter nfcAdapter;
     private NFCManager nfcManager;
-    private Address address;
-    private boolean fetchAddress;
-    private Geocoder geocoder;
-    private String bestProvider;
-    private List<Address> user = null;
-    private double lat;
-    private double lng;
+
+    //Define a request code to send to Google Play services
+    LocationManager locationManager;
+    String provider;
+    private double currentLatitude;
+    private double currentLongitude;
 
 
     @Override
@@ -57,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (NFCManager.NFCNotEnabled nfcnEn) {
             txtTagContent.setText("Este dispositivo não está habilitado para leitura de NFC.");
         }
-
     }
 
 
@@ -110,6 +105,9 @@ public class MainActivity extends AppCompatActivity {
 
         FirebaseManager firebaseManager = new FirebaseManager(this);
 
-        txtTagContent.setText(nfcManager.getTextContentFromTag(intent) + "\n" + "Latitude: " + "\n" + "Longitude: ");
+        String tagContent = nfcManager.getTextContentFromTag(intent);
+        txtTagContent.setText( tagContent + "\n Model: " + Build.MODEL + "\n Brand: " + Build.BRAND);
+
+        firebaseManager.salvarInformacoesNoFirebase(tagContent);
     }
 }
