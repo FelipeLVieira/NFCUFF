@@ -7,15 +7,11 @@ import com.google.firebase.database.IgnoreExtraProperties;
  */
 
 @IgnoreExtraProperties
-public class LeituraNFC {
+public class NfcDeviceData {
 
-    private String tagID = "";
+    private String deviceUniqueID = "";
+    private String tagUniqueID = "";
     private String tagContent = "";
-    private String tagAction = "";
-
-    private String deviceGPSCoordinates = "";
-    private String deviceAddress = "";
-
     private String buildVersionDevice = "";
     private String buildSerial = "";
     private String buildModel = "";
@@ -30,16 +26,25 @@ public class LeituraNFC {
     private String buildVersionRelease = "";
 
 
-    LeituraNFC() {
+    NfcDeviceData() {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
     }
 
-    public LeituraNFC(String tagID, String tagContent, String tagAction, String deviceGPSCoordinates, String deviceAddress, String buildVersionDevice, String buildSerial, String buildModel, String buildID, String buildManufacturer, String buildBrand, String buildType, String buildUser, String buildVersionSDK, String buildBoard, String buildFingerprint, String buildVersionRelease) {
-        this.tagID = tagID;
+    public NfcDeviceData(String deviceID, String tagUniqueID, String tagContent, String buildModel, String buildManufacturer, String buildBrand, String buildUser, String buildVersionSDK) {
+        this.deviceUniqueID = deviceID;
+        this.tagUniqueID = tagUniqueID;
         this.tagContent = tagContent;
-        this.tagAction = tagAction;
-        this.deviceGPSCoordinates = deviceGPSCoordinates;
-        this.deviceAddress = deviceAddress;
+        this.buildModel = buildModel;
+        this.buildManufacturer = buildManufacturer;
+        this.buildBrand = buildBrand;
+        this.buildUser = buildUser;
+        this.buildVersionSDK = buildVersionSDK;
+    }
+
+    public NfcDeviceData(String tagUniqueID, String tagContent, String tagAction, String buildVersionDevice, String buildSerial, String buildModel, String buildID, String buildManufacturer, String buildBrand, String buildType, String buildUser, String buildVersionSDK, String buildBoard, String buildFingerprint, String buildVersionRelease) {
+        this.deviceUniqueID = deviceUniqueID;
+        this.tagUniqueID = tagUniqueID;
+        this.tagContent = tagContent;
         this.buildVersionDevice = buildVersionDevice;
         this.buildSerial = buildSerial;
         this.buildModel = buildModel;
@@ -54,12 +59,20 @@ public class LeituraNFC {
         this.buildVersionRelease = buildVersionRelease;
     }
 
-    public String getTagID() {
-        return tagID;
+    public String getDeviceUniqueID() {
+        return deviceUniqueID;
     }
 
-    void setTagID(String tagID) {
-        this.tagID = tagID;
+    public void setDeviceUniqueID(String deviceUniqueID) {
+        this.deviceUniqueID = deviceUniqueID;
+    }
+
+    public String getTagUniqueID() {
+        return tagUniqueID;
+    }
+
+    void setTagUniqueID(String tagUniqueID) {
+        this.tagUniqueID = tagUniqueID;
     }
 
     public String getTagContent() {
@@ -68,30 +81,6 @@ public class LeituraNFC {
 
     void setTagContent(String tagContent) {
         this.tagContent = tagContent;
-    }
-
-    public String getTagAction() {
-        return tagAction;
-    }
-
-    void setTagAction(String tagAction) {
-        this.tagAction = tagAction;
-    }
-
-    public String getDeviceGPSCoordinates() {
-        return deviceGPSCoordinates;
-    }
-
-    public void setDeviceGPSCoordinates(String deviceGPSCoordinates) {
-        this.deviceGPSCoordinates = deviceGPSCoordinates;
-    }
-
-    public String getDeviceAddress() {
-        return deviceAddress;
-    }
-
-    public void setDeviceAddress(String deviceAddress) {
-        this.deviceAddress = deviceAddress;
     }
 
     public String getBuildVersionDevice() {

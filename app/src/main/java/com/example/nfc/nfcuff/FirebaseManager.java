@@ -1,7 +1,6 @@
 package com.example.nfc.nfcuff;
 
 import android.app.Activity;
-import android.nfc.Tag;
 import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
@@ -19,34 +18,17 @@ public class FirebaseManager {
         this.activity = activity;
     }
 
-    public void salvarInformacoesNoFirebase(String tagContent) {
+    public void storeNfcTagDataOnFirebase(NfcDeviceData nfcDeviceData) {
 
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         Toast.makeText(activity,
-                "salvarInformacoesNoFirebase()",
+                "storeNfcTagDataOnFirebase()",
                 Toast.LENGTH_SHORT).show();
 
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference("valor");
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference("nfcDeviceData");
 
-        database.setValue(tagContent);
+        database.child(nfcDeviceData.getDeviceUniqueID()).setValue(nfcDeviceData);
 
-    }
-
-    private String bytesToHexString(byte[] src) {
-        StringBuilder stringBuilder = new StringBuilder("0x");
-        if (src == null || src.length <= 0) {
-            return null;
-        }
-
-        char[] buffer = new char[2];
-        for (int i = 0; i < src.length; i++) {
-            buffer[0] = Character.forDigit((src[i] >>> 4) & 0x0F, 16);
-            buffer[1] = Character.forDigit(src[i] & 0x0F, 16);
-            System.out.println(buffer);
-            stringBuilder.append(buffer);
-        }
-
-        return stringBuilder.toString();
     }
 }

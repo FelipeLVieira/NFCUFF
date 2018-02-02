@@ -16,12 +16,12 @@ import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Locale;
 
-public class NFCManager {
+public class NfcManager {
 
     private Activity activity;
     private NfcAdapter nfcAdapter;
 
-    public NFCManager(Activity activity) {
+    public NfcManager(Activity activity) {
         this.activity = activity;
     }
 
@@ -135,9 +135,9 @@ public class NFCManager {
 
         try {
             ndef.connect();
-            txtTagContent += "Tipo: " + ndef.getType().toString() + "\n";
-            txtTagContent += "Tamanho: " + String.valueOf(ndef.getMaxSize()) + " bytes \n";
-            txtTagContent += "Pode escrever: " + (ndef.isWritable() ? "Verdadeiro" : "Falso") + "\n";
+            txtTagContent += "Tipo: " + ndef.getType().toString();
+            txtTagContent += " Tamanho: " + String.valueOf(ndef.getMaxSize()) + "bytes ";
+            txtTagContent += "Pode escrever: " + (ndef.isWritable() ? "Verdadeiro" : "Falso ");
 
             Parcelable[] messages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
 
@@ -150,7 +150,7 @@ public class NFCManager {
 
                 byte[] payload = record.getPayload();
                 String text = new String(payload);
-                txtTagContent += "Conteúdo: " + text + "\n";
+                txtTagContent += "Conteúdo: " + text;
 
 
                 ndef.close();
@@ -160,6 +160,29 @@ public class NFCManager {
             Toast.makeText(null, "Não foi possível ler a tag.", Toast.LENGTH_LONG).show();
         }
         return txtTagContent;
+    }
+
+    public String getTagUniqueIdFromIntent(Intent intent) {
+        Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        String tagUniqueId = bytesToHexString(tag.getId());
+        return tagUniqueId;
+    }
+
+    private String bytesToHexString(byte[] src) {
+        StringBuilder stringBuilder = new StringBuilder("0x");
+        if (src == null || src.length <= 0) {
+            return null;
+        }
+
+        char[] buffer = new char[2];
+        for (int i = 0; i < src.length; i++) {
+            buffer[0] = Character.forDigit((src[i] >>> 4) & 0x0F, 16);
+            buffer[1] = Character.forDigit(src[i] & 0x0F, 16);
+            System.out.println(buffer);
+            stringBuilder.append(buffer);
+        }
+
+        return stringBuilder.toString();
     }
 
     public static class NFCNotSupported extends Exception {

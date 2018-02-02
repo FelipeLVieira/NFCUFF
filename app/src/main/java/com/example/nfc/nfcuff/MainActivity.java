@@ -1,28 +1,26 @@
 package com.example.nfc.nfcuff;
 
 import android.content.Intent;
-import android.location.LocationManager;
 import android.nfc.NfcAdapter;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
 
     public static final String MIME_TEXT_PLAIN = "text/plain";
     public static final String TAG = "NfcDemo";
-    private TextView textView1;
+    private TextView title;
     private TextView txtTagContent;
+    private Switch tagContentSwitch;
     private NfcAdapter nfcAdapter;
-    private NFCManager nfcManager;
-
-    //Define a request code to send to Google Play services
-    LocationManager locationManager;
-    String provider;
-    private double currentLatitude;
-    private double currentLongitude;
+    private NfcManager nfcManager;
 
 
     @Override
@@ -35,22 +33,24 @@ public class MainActivity extends AppCompatActivity {
                 Toast.LENGTH_SHORT).show();
 
         //Views
-        textView1 = findViewById(R.id.tv);
+        title = findViewById(R.id.txtTitle);
         txtTagContent = findViewById(R.id.txtTagConent);
+        tagContentSwitch = findViewById(R.id.tagContentSwitch);
+        tagContentSwitch.setOnCheckedChangeListener(this);
 
         //Adapter
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
         //Manager
-        nfcManager = new NFCManager(this);
+        nfcManager = new NfcManager(this);
 
-        //Validar se o dispositivo possui suporte a NFC
+        //Check if the device is NFC ready
         try {
             nfcManager.verifyNFC();
             txtTagContent.setText("Dispositivo está apto a ler uma tag NFC.");
-        } catch (NFCManager.NFCNotSupported nfcnsup) {
+        } catch (NfcManager.NFCNotSupported nfcnsup) {
             txtTagContent.setText("Dispositivo está apto a ler uma tag NFC.");
-        } catch (NFCManager.NFCNotEnabled nfcnEn) {
+        } catch (NfcManager.NFCNotEnabled nfcnEn) {
             txtTagContent.setText("Este dispositivo não está habilitado para leitura de NFC.");
         }
     }
@@ -67,9 +67,9 @@ public class MainActivity extends AppCompatActivity {
         try {
             nfcManager.verifyNFC();
             nfcManager.setupForegroundDispatch(this);
-        } catch (NFCManager.NFCNotSupported nfcnsup) {
+        } catch (NfcManager.NFCNotSupported nfcnsup) {
             txtTagContent.setText("Dispositivo está apto a ler uma tag NFC.");
-        } catch (NFCManager.NFCNotEnabled nfcnEn) {
+        } catch (NfcManager.NFCNotEnabled nfcnEn) {
             txtTagContent.setText("Este dispositivo não está habilitado para leitura de NFC.");
         }
     }
@@ -105,9 +105,37 @@ public class MainActivity extends AppCompatActivity {
 
         FirebaseManager firebaseManager = new FirebaseManager(this);
 
+        String tagUniqueId = nfcManager.getTagUniqueIdFromIntent(intent);
         String tagContent = nfcManager.getTextContentFromTag(intent);
-        txtTagContent.setText( tagContent + "\n Model: " + Build.MODEL + "\n Brand: " + Build.BRAND);
+        String deviceId = Settings.Secure.getString(getContentResolver(),Settings.Secure.ANDROID_ID);
 
-        firebaseManager.salvarInformacoesNoFirebase(tagContent);
+        NfcDeviceData nfcDeviceData = new NfcDeviceData(deviceId, tagUniqueId, tagContent, Build.MODEL, Build.MANUFACTURER, Build.BRAND, Build.USER, Build.VERSION.SDK);
+
+        txtTagContent.setText("Device Unique ID: " + nfcDeviceData.getDeviceUniqueID() +
+                "\nTag Unique ID: " + nfcDeviceData.getTagUniqueID() +
+                "\n Content: " + nfcDeviceData.getTagContent() +
+                "\n Build Model: " + nfcDeviceData.getBuildModel() +
+                "\n Manufcturer: " + nfcDeviceData.getBuildManufacturer() +
+                "\n Brand: " + nfcDeviceData.getBuildBrand() +
+                "\n User: " + nfcDeviceData.getBuildUser() +
+                "\n Version SDK: " + nfcDeviceData.getBuildVersionSDK());
+
+        firebaseManager.storeNfcTagDataOnFirebase(nfcDeviceData);
+    }
+
+    private void toggleTagInfo() {
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+        switch (compoundButton.getId()) {
+            case R.id.tagContentSwitch:
+                if (isChecked == true) {
+                    txtTagContent.setVisibility(View.VISIBLE);
+                } else {
+                    txtTagContent.setVisibility(View.INVISIBLE);
+                }
+                break;
+        }
     }
 }
