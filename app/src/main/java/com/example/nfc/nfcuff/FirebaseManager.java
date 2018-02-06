@@ -20,15 +20,16 @@ public class FirebaseManager {
 
     public void storeNfcTagDataOnFirebase(NfcDeviceData nfcDeviceData) {
 
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-
         Toast.makeText(activity,
                 "storeNfcTagDataOnFirebase()",
                 Toast.LENGTH_SHORT).show();
 
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference("nfcDeviceData");
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference("nfcDeviceData")
+                .child(nfcDeviceData.getDeviceUniqueID())
+                .child(nfcDeviceData.getTagUniqueID())
+                .child(nfcDeviceData.getDate());
 
-        database.child(nfcDeviceData.getDeviceUniqueID()).setValue(nfcDeviceData);
+        database.setValue(nfcDeviceData);
 
     }
 }

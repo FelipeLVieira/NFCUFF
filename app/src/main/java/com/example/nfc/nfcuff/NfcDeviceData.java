@@ -12,8 +12,7 @@ public class NfcDeviceData {
     private String deviceUniqueID = "";
     private String tagUniqueID = "";
     private String tagContent = "";
-    private String buildVersionDevice = "";
-    private String buildSerial = "";
+    private String buildVersionRelease = "";
     private String buildModel = "";
     private String buildID = "";
     private String buildManufacturer = "";
@@ -23,30 +22,21 @@ public class NfcDeviceData {
     private String buildVersionSDK = "";
     private String buildBoard = "";
     private String buildFingerprint = "";
-    private String buildVersionRelease = "";
+    private String date = "";
 
 
     NfcDeviceData() {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
     }
 
-    public NfcDeviceData(String deviceID, String tagUniqueID, String tagContent, String buildModel, String buildManufacturer, String buildBrand, String buildUser, String buildVersionSDK) {
-        this.deviceUniqueID = deviceID;
-        this.tagUniqueID = tagUniqueID;
-        this.tagContent = tagContent;
-        this.buildModel = buildModel;
-        this.buildManufacturer = buildManufacturer;
-        this.buildBrand = buildBrand;
-        this.buildUser = buildUser;
-        this.buildVersionSDK = buildVersionSDK;
-    }
-
-    public NfcDeviceData(String tagUniqueID, String tagContent, String tagAction, String buildVersionDevice, String buildSerial, String buildModel, String buildID, String buildManufacturer, String buildBrand, String buildType, String buildUser, String buildVersionSDK, String buildBoard, String buildFingerprint, String buildVersionRelease) {
+    public NfcDeviceData(String deviceUniqueID, String tagUniqueID, String tagContent, String buildVersionRelease,
+                         String buildModel, String buildID, String buildManufacturer,
+                         String buildBrand, String buildType, String buildUser, String buildVersionSDK,
+                         String buildBoard, String buildFingerprint, String date) {
         this.deviceUniqueID = deviceUniqueID;
         this.tagUniqueID = tagUniqueID;
         this.tagContent = tagContent;
-        this.buildVersionDevice = buildVersionDevice;
-        this.buildSerial = buildSerial;
+        this.buildVersionRelease = buildVersionRelease;
         this.buildModel = buildModel;
         this.buildID = buildID;
         this.buildManufacturer = buildManufacturer;
@@ -56,7 +46,7 @@ public class NfcDeviceData {
         this.buildVersionSDK = buildVersionSDK;
         this.buildBoard = buildBoard;
         this.buildFingerprint = buildFingerprint;
-        this.buildVersionRelease = buildVersionRelease;
+        this.date = date;
     }
 
     public String getDeviceUniqueID() {
@@ -71,7 +61,7 @@ public class NfcDeviceData {
         return tagUniqueID;
     }
 
-    void setTagUniqueID(String tagUniqueID) {
+    public void setTagUniqueID(String tagUniqueID) {
         this.tagUniqueID = tagUniqueID;
     }
 
@@ -79,24 +69,16 @@ public class NfcDeviceData {
         return tagContent;
     }
 
-    void setTagContent(String tagContent) {
+    public void setTagContent(String tagContent) {
         this.tagContent = tagContent;
     }
 
-    public String getBuildVersionDevice() {
-        return buildVersionDevice;
+    public String getBuildVersionRelease() {
+        return buildVersionRelease;
     }
 
-    public void setBuildVersionDevice(String buildVersionDevice) {
-        this.buildVersionDevice = buildVersionDevice;
-    }
-
-    public String getBuildSerial() {
-        return buildSerial;
-    }
-
-    public void setBuildSerial(String buildSerial) {
-        this.buildSerial = buildSerial;
+    public void setBuildVersionRelease(String buildVersionRelease) {
+        this.buildVersionRelease = buildVersionRelease;
     }
 
     public String getBuildModel() {
@@ -111,7 +93,7 @@ public class NfcDeviceData {
         return buildID;
     }
 
-    void setBuildID(String buildID) {
+    public void setBuildID(String buildID) {
         this.buildID = buildID;
     }
 
@@ -171,12 +153,12 @@ public class NfcDeviceData {
         this.buildFingerprint = buildFingerprint;
     }
 
-    public String getBuildVersionRelease() {
-        return buildVersionRelease;
+    public String getDate() {
+        return date;
     }
 
-    public void setBuildVersionRelease(String buildVersionRelease) {
-        this.buildVersionRelease = buildVersionRelease;
+    public void setDate(String date) {
+        this.date = date;
     }
 
     /*

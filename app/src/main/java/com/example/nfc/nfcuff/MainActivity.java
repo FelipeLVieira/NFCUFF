@@ -6,11 +6,16 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
+import android.system.Os;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
 
@@ -21,6 +26,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     private Switch tagContentSwitch;
     private NfcAdapter nfcAdapter;
     private NfcManager nfcManager;
+    private FirebaseManager firebaseManager;
 
 
     @Override
@@ -32,19 +38,17 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 "onCreate()",
                 Toast.LENGTH_SHORT).show();
 
-        //Views
+        //Referências dos objetos da activity
         title = findViewById(R.id.txtTitle);
         txtTagContent = findViewById(R.id.txtTagConent);
         tagContentSwitch = findViewById(R.id.tagContentSwitch);
         tagContentSwitch.setOnCheckedChangeListener(this);
 
-        //Adapter
-        nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-
-        //Manager
+        //Instanciar os managers
         nfcManager = new NfcManager(this);
+        firebaseManager = new FirebaseManager(this);
 
-        //Check if the device is NFC ready
+        //Verificar se o dispositivo possui suporte a NFC
         try {
             nfcManager.verifyNFC();
             txtTagContent.setText("Dispositivo está apto a ler uma tag NFC.");
@@ -64,14 +68,8 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 "onResume()",
                 Toast.LENGTH_SHORT).show();
 
-        try {
-            nfcManager.verifyNFC();
-            nfcManager.setupForegroundDispatch(this);
-        } catch (NfcManager.NFCNotSupported nfcnsup) {
-            txtTagContent.setText("Dispositivo está apto a ler uma tag NFC.");
-        } catch (NfcManager.NFCNotEnabled nfcnEn) {
-            txtTagContent.setText("Este dispositivo não está habilitado para leitura de NFC.");
-        }
+        //Configurar o ForegroundDispatch
+        nfcManager.setupForegroundDispatch(this);
     }
 
     @Override
@@ -82,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 "onPause()",
                 Toast.LENGTH_SHORT).show();
 
+        //Desabilitar o ForegroundDispatch
         nfcManager.disableDispatch();
     }
 
@@ -94,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 "onNewIntent()",
                 Toast.LENGTH_SHORT).show();
 
+        //Intent com os dados do NFC é enviada para o método de tratamento
         handleIntent(intent);
     }
 
@@ -103,23 +103,39 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 "handleIntent()",
                 Toast.LENGTH_SHORT).show();
 
-        FirebaseManager firebaseManager = new FirebaseManager(this);
-
+        //São extraídas as informações da tag e do dispositivo para serem armazenadas
         String tagUniqueId = nfcManager.getTagUniqueIdFromIntent(intent);
+        //O ID único do dispositivo
+        String deviceUniqueId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        //O conteúdo que foi escrito na tag
         String tagContent = nfcManager.getTextContentFromTag(intent);
-        String deviceId = Settings.Secure.getString(getContentResolver(),Settings.Secure.ANDROID_ID);
+        //É criado uma data no formato de string
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        Date date = new Date();
+        String strDate = dateFormat.format(date).toString();
 
-        NfcDeviceData nfcDeviceData = new NfcDeviceData(deviceId, tagUniqueId, tagContent, Build.MODEL, Build.MANUFACTURER, Build.BRAND, Build.USER, Build.VERSION.SDK);
+        //É chamado o construtor do objeto de leitura e são passadas todas as informações que serão persistidas
+        NfcDeviceData nfcDeviceData = new NfcDeviceData(deviceUniqueId, tagUniqueId, tagContent, Build.VERSION.RELEASE,
+                Build.MODEL, Build.ID, Build.MANUFACTURER, Build.BRAND, Build.TYPE, Build.USER, Build.VERSION.SDK,
+                Build.BOARD, Build.FINGERPRINT, strDate);
 
+        //Os dados de leitura que foram salvos no objeto nfcDeviceData também são printados numa caixa de texto no app
         txtTagContent.setText("Device Unique ID: " + nfcDeviceData.getDeviceUniqueID() +
                 "\nTag Unique ID: " + nfcDeviceData.getTagUniqueID() +
                 "\n Content: " + nfcDeviceData.getTagContent() +
+                "\n Build Version Release: " + nfcDeviceData.getBuildVersionRelease() +
                 "\n Build Model: " + nfcDeviceData.getBuildModel() +
-                "\n Manufcturer: " + nfcDeviceData.getBuildManufacturer() +
-                "\n Brand: " + nfcDeviceData.getBuildBrand() +
-                "\n User: " + nfcDeviceData.getBuildUser() +
-                "\n Version SDK: " + nfcDeviceData.getBuildVersionSDK());
+                "\n Build ID: " + nfcDeviceData.getBuildID() +
+                "\n Build Manufcturer: " + nfcDeviceData.getBuildManufacturer() +
+                "\n Build Brand: " + nfcDeviceData.getBuildBrand() +
+                "\n Build Type: " + nfcDeviceData.getBuildType() +
+                "\n Build User: " + nfcDeviceData.getBuildUser() +
+                "\n Version SDK: " + nfcDeviceData.getBuildVersionSDK() +
+                "\n Build Board: " + nfcDeviceData.getBuildBoard() +
+                "\n Build Fingerprint: " + nfcDeviceData.getBuildFingerprint() +
+                "\n Date: " + strDate);
 
+        //É chamado o Firebase manager para efetuar a persistência dos dados da leitura
         firebaseManager.storeNfcTagDataOnFirebase(nfcDeviceData);
     }
 

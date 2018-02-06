@@ -137,7 +137,7 @@ public class NfcManager {
             ndef.connect();
             txtTagContent += "Tipo: " + ndef.getType().toString();
             txtTagContent += " Tamanho: " + String.valueOf(ndef.getMaxSize()) + "bytes ";
-            txtTagContent += "Pode escrever: " + (ndef.isWritable() ? " Verdadeiro" : " Falso ");
+            txtTagContent += "Pode escrever: " + (ndef.isWritable() ? " Verdadeiro " : " Falso ");
 
             Parcelable[] messages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
 
@@ -150,7 +150,7 @@ public class NfcManager {
 
                 byte[] payload = record.getPayload();
                 String text = new String(payload);
-                txtTagContent += "Conteúdo: " + text;
+                txtTagContent += " Conteúdo: " + text;
 
 
                 ndef.close();
