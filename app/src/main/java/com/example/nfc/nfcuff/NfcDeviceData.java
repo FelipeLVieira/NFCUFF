@@ -12,7 +12,7 @@ public class NfcDeviceData {
     private String deviceUniqueID = "";
     private String tagUniqueID = "";
     private String tagContent = "";
-    private String buildVersionRelease = "";
+    /*private String buildVersionRelease = "";
     private String buildModel = "";
     private String buildID = "";
     private String buildManufacturer = "";
@@ -21,22 +21,29 @@ public class NfcDeviceData {
     private String buildUser = "";
     private String buildVersionSDK = "";
     private String buildBoard = "";
-    private String buildFingerprint = "";
-    private String date = "";
+    private String buildFingerprint = "";*/
+    private Long currentTimeMillis = 0l;
 
 
     NfcDeviceData() {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
     }
 
-    public NfcDeviceData(String deviceUniqueID, String tagUniqueID, String tagContent, String buildVersionRelease,
-                         String buildModel, String buildID, String buildManufacturer,
-                         String buildBrand, String buildType, String buildUser, String buildVersionSDK,
-                         String buildBoard, String buildFingerprint, String date) {
+    public NfcDeviceData(String deviceUniqueID, String tagUniqueID, String tagContent, Long currentTimeMillis) {
         this.deviceUniqueID = deviceUniqueID;
         this.tagUniqueID = tagUniqueID;
         this.tagContent = tagContent;
-        this.buildVersionRelease = buildVersionRelease;
+        this.currentTimeMillis = currentTimeMillis;
+    }
+
+    public NfcDeviceData(String deviceUniqueID, String tagUniqueID, String tagContent, String buildVersionRelease,
+                         String buildModel, String buildID, String buildManufacturer,
+                         String buildBrand, String buildType, String buildUser, String buildVersionSDK,
+                         String buildBoard, String buildFingerprint, Long currentTimeMillis) {
+        this.deviceUniqueID = deviceUniqueID;
+        this.tagUniqueID = tagUniqueID;
+        this.tagContent = tagContent;
+        /*this.buildVersionRelease = buildVersionRelease;
         this.buildModel = buildModel;
         this.buildID = buildID;
         this.buildManufacturer = buildManufacturer;
@@ -45,8 +52,8 @@ public class NfcDeviceData {
         this.buildUser = buildUser;
         this.buildVersionSDK = buildVersionSDK;
         this.buildBoard = buildBoard;
-        this.buildFingerprint = buildFingerprint;
-        this.date = date;
+        this.buildFingerprint = buildFingerprint;*/
+        this.currentTimeMillis = currentTimeMillis;
     }
 
     public String getDeviceUniqueID() {
@@ -73,7 +80,7 @@ public class NfcDeviceData {
         this.tagContent = tagContent;
     }
 
-    public String getBuildVersionRelease() {
+/*    public String getBuildVersionRelease() {
         return buildVersionRelease;
     }
 
@@ -151,14 +158,14 @@ public class NfcDeviceData {
 
     public void setBuildFingerprint(String buildFingerprint) {
         this.buildFingerprint = buildFingerprint;
+    }*/
+
+    public Long getCurrentTimeMillis() {
+        return currentTimeMillis;
     }
 
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
+    public void setCurrentTimeMillis(Long currentTimeMillis) {
+        this.currentTimeMillis = currentTimeMillis;
     }
 
     /*

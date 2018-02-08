@@ -2,18 +2,15 @@ package com.example.nfc.nfcuff;
 
 import android.content.Intent;
 import android.nfc.NfcAdapter;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
-import android.system.Os;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -109,18 +106,17 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         String deviceUniqueId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
         //O conteúdo que foi escrito na tag
         String tagContent = nfcManager.getTextContentFromTag(intent);
-        //É criado uma data no formato de string
-        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        Date date = new Date();
-        String strDate = dateFormat.format(date).toString();
 
         //É chamado o construtor do objeto de leitura e são passadas todas as informações que serão persistidas
-        NfcDeviceData nfcDeviceData = new NfcDeviceData(deviceUniqueId, tagUniqueId, tagContent, Build.VERSION.RELEASE,
+        /*NfcDeviceData nfcDeviceData = new NfcDeviceData(deviceUniqueId, tagUniqueId, tagContent, Build.VERSION.RELEASE,
                 Build.MODEL, Build.ID, Build.MANUFACTURER, Build.BRAND, Build.TYPE, Build.USER, Build.VERSION.SDK,
-                Build.BOARD, Build.FINGERPRINT, strDate);
+                Build.BOARD, Build.FINGERPRINT, System.currentTimeMillis());*/
+
+        NfcDeviceData nfcDeviceData = new NfcDeviceData(deviceUniqueId, tagUniqueId, tagContent,
+                System.currentTimeMillis());
 
         //Os dados de leitura que foram salvos no objeto nfcDeviceData também são printados numa caixa de texto no app
-        txtTagContent.setText("Device Unique ID: " + nfcDeviceData.getDeviceUniqueID() +
+        /*txtTagContent.setText("Device Unique ID: " + nfcDeviceData.getDeviceUniqueID() +
                 "\nTag Unique ID: " + nfcDeviceData.getTagUniqueID() +
                 "\n Content: " + nfcDeviceData.getTagContent() +
                 "\n Build Version Release: " + nfcDeviceData.getBuildVersionRelease() +
@@ -133,14 +129,17 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 "\n Version SDK: " + nfcDeviceData.getBuildVersionSDK() +
                 "\n Build Board: " + nfcDeviceData.getBuildBoard() +
                 "\n Build Fingerprint: " + nfcDeviceData.getBuildFingerprint() +
-                "\n Date: " + strDate);
+                "\n Date: " + System.currentTimeMillis());*/
+
+        txtTagContent.setText("Device Unique ID: " + nfcDeviceData.getDeviceUniqueID() +
+                "\nTag Unique ID: " + nfcDeviceData.getTagUniqueID() +
+                "\n Content: " + nfcDeviceData.getTagContent() +
+                "\n Date: " + firebaseManager.getDate(nfcDeviceData.getCurrentTimeMillis()));
 
         //É chamado o Firebase manager para efetuar a persistência dos dados da leitura
         firebaseManager.storeNfcTagDataOnFirebase(nfcDeviceData);
     }
 
-    private void toggleTagInfo() {
-    }
 
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
