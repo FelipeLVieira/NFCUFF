@@ -2,6 +2,7 @@ package com.example.nfc.nfcuff;
 
 import android.content.Intent;
 import android.nfc.NfcAdapter;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
@@ -11,19 +12,17 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
 
     public static final String MIME_TEXT_PLAIN = "text/plain";
     public static final String TAG = "NfcDemo";
-    private TextView title;
-    private TextView txtTagContent;
-    private Switch tagContentSwitch;
-    private NfcAdapter nfcAdapter;
-    private NfcManager nfcManager;
-    private FirebaseManager firebaseManager;
+    public static final String EXTRA_MESSAGE = "com.example.nfc.nfcuff.MESSAGE";
+    private TextView title = null;
+    private TextView txtTagContent = null;
+    private Switch tagContentSwitch = null;
+    private NfcAdapter nfcAdapter = null;
+    private NfcManager nfcManager = new NfcManager(this);
+    private FirebaseManager firebaseManager = new FirebaseManager(this);
 
 
     @Override
@@ -40,10 +39,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         txtTagContent = findViewById(R.id.txtTagConent);
         tagContentSwitch = findViewById(R.id.tagContentSwitch);
         tagContentSwitch.setOnCheckedChangeListener(this);
-
-        //Instanciar os managers
-        nfcManager = new NfcManager(this);
-        firebaseManager = new FirebaseManager(this);
 
         //Verificar se o dispositivo possui suporte a NFC
         try {
@@ -100,49 +95,50 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 "handleIntent()",
                 Toast.LENGTH_SHORT).show();
 
+
         //São extraídas as informações da tag e do dispositivo para serem armazenadas
         String tagUniqueId = nfcManager.getTagUniqueIdFromIntent(intent);
         //O ID único do dispositivo
         String deviceUniqueId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
         //O conteúdo que foi escrito na tag
-        String tagContent = nfcManager.getTextContentFromTag(intent);
+        TagData tagData = nfcManager.getTextContentFromTag(intent);
 
         //É chamado o construtor do objeto de leitura e são passadas todas as informações que serão persistidas
-        /*NfcDeviceData nfcDeviceData = new NfcDeviceData(deviceUniqueId, tagUniqueId, tagContent, Build.VERSION.RELEASE,
-                Build.MODEL, Build.ID, Build.MANUFACTURER, Build.BRAND, Build.TYPE, Build.USER, Build.VERSION.SDK,
-                Build.BOARD, Build.FINGERPRINT, System.currentTimeMillis());*/
+        FirebaseDeviceAndTagData firebaseDeviceAndTagData = new FirebaseDeviceAndTagData(deviceUniqueId, tagUniqueId,
+                tagData, Build.VERSION.RELEASE,
+                Build.MODEL, Build.ID, Build.MANUFACTURER, Build.BRAND,
+                Build.TYPE, Build.USER, Build.VERSION.SDK,
+                Build.BOARD, Build.FINGERPRINT, System.currentTimeMillis());
 
-        NfcDeviceData nfcDeviceData = new NfcDeviceData(deviceUniqueId, tagUniqueId, tagContent,
-                System.currentTimeMillis());
-
-        //Os dados de leitura que foram salvos no objeto nfcDeviceData também são printados numa caixa de texto no app
-        /*txtTagContent.setText("Device Unique ID: " + nfcDeviceData.getDeviceUniqueID() +
-                "\nTag Unique ID: " + nfcDeviceData.getTagUniqueID() +
-                "\n Content: " + nfcDeviceData.getTagContent() +
-                "\n Build Version Release: " + nfcDeviceData.getBuildVersionRelease() +
-                "\n Build Model: " + nfcDeviceData.getBuildModel() +
-                "\n Build ID: " + nfcDeviceData.getBuildID() +
-                "\n Build Manufcturer: " + nfcDeviceData.getBuildManufacturer() +
-                "\n Build Brand: " + nfcDeviceData.getBuildBrand() +
-                "\n Build Type: " + nfcDeviceData.getBuildType() +
-                "\n Build User: " + nfcDeviceData.getBuildUser() +
-                "\n Version SDK: " + nfcDeviceData.getBuildVersionSDK() +
-                "\n Build Board: " + nfcDeviceData.getBuildBoard() +
-                "\n Build Fingerprint: " + nfcDeviceData.getBuildFingerprint() +
-                "\n Date: " + System.currentTimeMillis());*/
-
-        txtTagContent.setText("Device Unique ID: " + nfcDeviceData.getDeviceUniqueID() +
-                "\nTag Unique ID: " + nfcDeviceData.getTagUniqueID() +
-                "\n Content: " + nfcDeviceData.getTagContent() +
-                "\n Date: " + firebaseManager.getDate(nfcDeviceData.getCurrentTimeMillis()));
+        //Os dados de leitura que foram salvos no objeto firebaseDeviceAndTagData também são printados numa caixa de texto no app
+        txtTagContent.setText("Device Unique ID: " + firebaseDeviceAndTagData.getDeviceUniqueID() +
+                "\nTag Unique ID: " + firebaseDeviceAndTagData.getTagUniqueID() +
+                "\n Tag Content: " + firebaseDeviceAndTagData.getTagData().toString() +
+                "\n Build Version Release: " + firebaseDeviceAndTagData.getBuildVersionRelease() +
+                "\n Build Model: " + firebaseDeviceAndTagData.getBuildModel() +
+                "\n Build ID: " + firebaseDeviceAndTagData.getBuildID() +
+                "\n Build Manufcturer: " + firebaseDeviceAndTagData.getBuildManufacturer() +
+                "\n Build Brand: " + firebaseDeviceAndTagData.getBuildBrand() +
+                "\n Build Type: " + firebaseDeviceAndTagData.getBuildType() +
+                "\n Build User: " + firebaseDeviceAndTagData.getBuildUser() +
+                "\n Version SDK: " + firebaseDeviceAndTagData.getBuildVersionSDK() +
+                "\n Build Board: " + firebaseDeviceAndTagData.getBuildBoard() +
+                "\n Build Fingerprint: " + firebaseDeviceAndTagData.getBuildFingerprint() +
+                "\n Date: " + System.currentTimeMillis());
 
         //É chamado o Firebase manager para efetuar a persistência dos dados da leitura
-        firebaseManager.storeNfcTagDataOnFirebase(nfcDeviceData);
+        firebaseManager.storeNfcTagDataOnFirebase(firebaseDeviceAndTagData);
+
+        //Enviar para a activity com os detalhes do produto
+        /*Intent displayIntent = new Intent(this, DisplayProductActivity.class);
+        intent.putExtra(EXTRA_MESSAGE, tagData.content);
+        startActivity(displayIntent);*/
     }
 
 
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+        //Alterar a visibilidade do switch
         switch (compoundButton.getId()) {
             case R.id.tagContentSwitch:
                 if (isChecked == true) {

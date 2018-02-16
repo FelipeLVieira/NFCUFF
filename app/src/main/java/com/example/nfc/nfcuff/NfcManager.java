@@ -128,16 +128,17 @@ public class NfcManager {
         return ndefRecord.getTnf() == tnf && Arrays.equals(ndefRecord.getType(), rdt);
     }
 
-    public String getTextContentFromTag(Intent intent) {
+    public TagData getTextContentFromTag(Intent intent) {
         Ndef ndef = Ndef.get(getTagFromIntent(intent));
 
-        String txtTagContent = "";
+        TagData returnTagData = new TagData();
 
         try {
             ndef.connect();
-            txtTagContent += "Tipo: " + ndef.getType().toString();
-            txtTagContent += " Tamanho: " + String.valueOf(ndef.getMaxSize()) + "bytes ";
-            txtTagContent += "Pode escrever: " + (ndef.isWritable() ? " Verdadeiro " : " Falso ");
+
+            returnTagData.setType(ndef.getType().toString());
+            returnTagData.setSize(String.valueOf(ndef.getMaxSize()) + " bytes ");
+            returnTagData.setWritable((ndef.isWritable() ? " Verdadeiro " : " Falso "));
 
             Parcelable[] messages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
 
@@ -150,8 +151,7 @@ public class NfcManager {
 
                 byte[] payload = record.getPayload();
                 String text = new String(payload);
-                txtTagContent += " Conteúdo: " + text;
-
+                returnTagData.setContent(text);
 
                 ndef.close();
 
@@ -159,7 +159,7 @@ public class NfcManager {
         } catch (Exception e) {
             Toast.makeText(null, "Não foi possível ler a tag.", Toast.LENGTH_LONG).show();
         }
-        return txtTagContent;
+        return returnTagData;
     }
 
     public String getTagUniqueIdFromIntent(Intent intent) {

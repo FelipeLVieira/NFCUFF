@@ -21,31 +21,30 @@ public class FirebaseManager {
         this.activity = activity;
     }
 
-    public void storeNfcTagDataOnFirebase(NfcDeviceData nfcDeviceData) {
+    public void storeNfcTagDataOnFirebase(FirebaseDeviceAndTagData firebaseDeviceAndTagData) {
 
         Toast.makeText(activity,
                 "storeNfcTagDataOnFirebase()",
                 Toast.LENGTH_SHORT).show();
 
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference("nfcDeviceData")
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference("firebaseDeviceAndTagData")
                 .child("Devices")
-                .child(nfcDeviceData.getDeviceUniqueID())
+                .child(firebaseDeviceAndTagData.getDeviceUniqueID())
                 .child("Tags")
-                .child(nfcDeviceData.getTagUniqueID())
+                .child(firebaseDeviceAndTagData.getTagUniqueID())
                 .child(getDate(System.currentTimeMillis()));
 
-        database.setValue(nfcDeviceData);
+        database.setValue(firebaseDeviceAndTagData);
 
     }
 
-    public String getDate(long timeStamp){
+    public String getDate(long timeStamp) {
 
-        try{
+        try {
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
             Date netDate = (new Date(timeStamp));
             return sdf.format(netDate);
-        }
-        catch(Exception ex){
+        } catch (Exception ex) {
             return "xx";
         }
     }

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">NFC UFF</string>
+    <string name="title_activity_product_details">ProductDetailsActivity</string>
 </resources>
