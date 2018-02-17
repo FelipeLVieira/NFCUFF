@@ -1,7 +1,6 @@
 package com.example.nfc.nfcuff;
 
 import android.content.Intent;
-import android.nfc.NfcAdapter;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -14,13 +13,17 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
 
+    //Constantes
     public static final String MIME_TEXT_PLAIN = "text/plain";
     public static final String TAG = "NfcDemo";
     public static final String EXTRA_MESSAGE = "com.example.nfc.nfcuff.MESSAGE";
+
+    //Elementos da Tela
     private TextView title = null;
     private TextView txtTagContent = null;
     private Switch tagContentSwitch = null;
-    private NfcAdapter nfcAdapter = null;
+
+    //Managers
     private NfcManager nfcManager = new NfcManager(this);
     private FirebaseManager firebaseManager = new FirebaseManager(this);
 
@@ -60,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 "onResume()",
                 Toast.LENGTH_SHORT).show();
 
-        //Configurar o ForegroundDispatch
+        getAdapter();
         nfcManager.setupForegroundDispatch(this);
     }
 
@@ -96,15 +99,14 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 Toast.LENGTH_SHORT).show();
 
 
-        //São extraídas as informações da tag e do dispositivo para serem armazenadas
-        String tagUniqueId = nfcManager.getTagUniqueIdFromIntent(intent);
         //O ID único do dispositivo
         String deviceUniqueId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+
         //O conteúdo que foi escrito na tag
         TagData tagData = nfcManager.getTextContentFromTag(intent);
 
         //É chamado o construtor do objeto de leitura e são passadas todas as informações que serão persistidas
-        FirebaseDeviceAndTagData firebaseDeviceAndTagData = new FirebaseDeviceAndTagData(deviceUniqueId, tagUniqueId,
+        FirebaseDeviceAndTagData firebaseDeviceAndTagData = new FirebaseDeviceAndTagData(deviceUniqueId,
                 tagData, Build.VERSION.RELEASE,
                 Build.MODEL, Build.ID, Build.MANUFACTURER, Build.BRAND,
                 Build.TYPE, Build.USER, Build.VERSION.SDK,
@@ -112,8 +114,11 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
         //Os dados de leitura que foram salvos no objeto firebaseDeviceAndTagData também são printados numa caixa de texto no app
         txtTagContent.setText("Device Unique ID: " + firebaseDeviceAndTagData.getDeviceUniqueID() +
-                "\nTag Unique ID: " + firebaseDeviceAndTagData.getTagUniqueID() +
-                "\n Tag Content: " + firebaseDeviceAndTagData.getTagData().toString() +
+                "\n Tag Unique ID: " + firebaseDeviceAndTagData.getTagData().getUniqueId() +
+                "\n Tag Content: " + firebaseDeviceAndTagData.getTagData().getContent() +
+                "\n Tag Size: " + firebaseDeviceAndTagData.getTagData().getSize() +
+                "\n Tag Writable: " + firebaseDeviceAndTagData.getTagData().getWritable() +
+                "\n Tag Type: " + firebaseDeviceAndTagData.getTagData().getType() +
                 "\n Build Version Release: " + firebaseDeviceAndTagData.getBuildVersionRelease() +
                 "\n Build Model: " + firebaseDeviceAndTagData.getBuildModel() +
                 "\n Build ID: " + firebaseDeviceAndTagData.getBuildID() +
@@ -147,6 +152,13 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                     txtTagContent.setVisibility(View.INVISIBLE);
                 }
                 break;
+        }
+    }
+
+    private void getAdapter() {
+        if (nfcManager == null || firebaseManager == null) {
+            nfcManager = new NfcManager(this);
+            firebaseManager = new FirebaseManager(this);
         }
     }
 }

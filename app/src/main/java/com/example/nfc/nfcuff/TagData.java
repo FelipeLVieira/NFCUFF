@@ -9,6 +9,7 @@ import com.google.firebase.database.IgnoreExtraProperties;
 @IgnoreExtraProperties
 public class TagData {
 
+    String uniqueId;
     String type = "";
     String size = "";
     String writable = "";
@@ -48,5 +49,13 @@ public class TagData {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getUniqueId() {
+        return uniqueId;
+    }
+
+    public void setUniqueId(String uniqueId) {
+        this.uniqueId = uniqueId;
     }
 }

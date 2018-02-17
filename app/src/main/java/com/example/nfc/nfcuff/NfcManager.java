@@ -136,6 +136,7 @@ public class NfcManager {
         try {
             ndef.connect();
 
+            returnTagData.setUniqueId(getTagUniqueIdFromIntent(intent));
             returnTagData.setType(ndef.getType().toString());
             returnTagData.setSize(String.valueOf(ndef.getMaxSize()) + " bytes ");
             returnTagData.setWritable((ndef.isWritable() ? " Verdadeiro " : " Falso "));
@@ -150,7 +151,15 @@ public class NfcManager {
                 NdefRecord record = ndefMessages[0].getRecords()[0];
 
                 byte[] payload = record.getPayload();
-                String text = new String(payload);
+
+                String textEncoding = ((payload[0] & 128) == 0) ? "UTF-8" : "UTF-16";
+
+                int languageSize = payload[0] & 0063;
+
+                String text = new String(payload, languageSize + 1, payload.length -
+                        languageSize - 1, textEncoding);
+
+                //String text = new String(payload);
                 returnTagData.setContent(text);
 
                 ndef.close();

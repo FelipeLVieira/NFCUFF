@@ -10,7 +10,6 @@ import com.google.firebase.database.IgnoreExtraProperties;
 public class FirebaseDeviceAndTagData {
 
     private String deviceUniqueID = "";
-    private String tagUniqueID = "";
     private TagData tagData = new TagData();
     private String buildVersionRelease = "";
     private String buildModel = "";
@@ -29,19 +28,12 @@ public class FirebaseDeviceAndTagData {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
     }
 
-    public FirebaseDeviceAndTagData(String deviceUniqueID, String tagUniqueID, TagData tagData, Long currentTimeMillis) {
-        this.deviceUniqueID = deviceUniqueID;
-        this.tagUniqueID = tagUniqueID;
-        this.tagData = tagData;
-        this.currentTimeMillis = currentTimeMillis;
-    }
 
-    public FirebaseDeviceAndTagData(String deviceUniqueID, String tagUniqueID, TagData tagData, String buildVersionRelease,
+    public FirebaseDeviceAndTagData(String deviceUniqueID, TagData tagData, String buildVersionRelease,
                                     String buildModel, String buildID, String buildManufacturer,
                                     String buildBrand, String buildType, String buildUser, String buildVersionSDK,
                                     String buildBoard, String buildFingerprint, Long currentTimeMillis) {
         this.deviceUniqueID = deviceUniqueID;
-        this.tagUniqueID = tagUniqueID;
         this.tagData = tagData;
         this.buildVersionRelease = buildVersionRelease;
         this.buildModel = buildModel;
@@ -62,14 +54,6 @@ public class FirebaseDeviceAndTagData {
 
     public void setDeviceUniqueID(String deviceUniqueID) {
         this.deviceUniqueID = deviceUniqueID;
-    }
-
-    public String getTagUniqueID() {
-        return tagUniqueID;
-    }
-
-    public void setTagUniqueID(String tagUniqueID) {
-        this.tagUniqueID = tagUniqueID;
     }
 
     public TagData getTagData() {
@@ -167,25 +151,5 @@ public class FirebaseDeviceAndTagData {
     public void setCurrentTimeMillis(Long currentTimeMillis) {
         this.currentTimeMillis = currentTimeMillis;
     }
-
-    /*
-
-    Log.i("TAG", "SERIAL: " + Build.SERIAL);
-    Log.i("TAG","MODEL: " + Build.MODEL);
-    Log.i("TAG","ID: " + Build.ID);
-    Log.i("TAG","Manufacture: " + Build.MANUFACTURER);
-    Log.i("TAG","brand: " + Build.BRAND);
-    Log.i("TAG","type: " + Build.TYPE);
-    Log.i("TAG","user: " + Build.USER);
-    Log.i("TAG","BASE: " + Build.VERSION_CODES.BASE);
-    Log.i("TAG","INCREMENTAL " + Build.VERSION.INCREMENTAL);
-    Log.i("TAG","SDK  " + Build.VERSION.SDK);
-    Log.i("TAG","BOARD: " + Build.BOARD);
-    Log.i("TAG","HOST " + Build.HOST);
-    Log.i("TAG","FINGERPRINT: "+Build.FINGERPRINT);
-    Log.i("TAG","Version Code: " + Build.VERSION.RELEASE);
-    Build.VERSION.DEVICE;
-*/
-
 }
 

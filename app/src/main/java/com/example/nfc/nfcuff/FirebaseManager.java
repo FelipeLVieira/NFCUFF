@@ -31,7 +31,7 @@ public class FirebaseManager {
                 .child("Devices")
                 .child(firebaseDeviceAndTagData.getDeviceUniqueID())
                 .child("Tags")
-                .child(firebaseDeviceAndTagData.getTagUniqueID())
+                .child(firebaseDeviceAndTagData.getTagData().getUniqueId())
                 .child(getDate(System.currentTimeMillis()));
 
         database.setValue(firebaseDeviceAndTagData);
