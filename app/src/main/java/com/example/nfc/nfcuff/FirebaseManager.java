@@ -44,6 +44,10 @@ public class FirebaseManager {
                 .getTagData()
                 .getContent());
 
+        insertLastProduct(firebaseDeviceAndTagData
+                .getTagData()
+                .getContent());
+
         database.setValue(firebaseDeviceAndTagData);
     }
 
@@ -88,5 +92,11 @@ public class FirebaseManager {
         catch(Exception ex){
             throw ex;
         }
+    }
+
+    public void insertLastProduct(String productID){
+        FirebaseDatabase
+                .getInstance()
+                .getReference("parameters/lastProductRead").setValue(productID);
     }
 }
