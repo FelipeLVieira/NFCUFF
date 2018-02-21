@@ -83,42 +83,55 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="108dp"
+            android:layout_marginTop="68dp"
             android:text="Aproxime uma TAG"
             android:textAlignment="center"
-            android:textSize="18sp"
+            android:textSize="30sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.502"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tagContentSwitch" />
 
-        <ImageView
-            android:id="@+id/imageView3"
-            android:layout_width="310dp"
-            android:layout_height="329dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="84dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView"
-            app:srcCompat="@drawable/notebook" />
-
         <TextView
             android:id="@+id/txtTagConent"
-            android:layout_width="295dp"
-            android:layout_height="335dp"
+            android:layout_width="300dp"
+            android:layout_height="448dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="220dp"
-            android:text="Conteúdo da Tag"
+            android:layout_marginTop="132dp"
+            android:text="Dados da Tag"
             android:textAlignment="center"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.505"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView3" />
+            app:layout_constraintTop_toBottomOf="@+id/txtDescription" />
+
+        <TextView
+            android:id="@+id/txtDescription"
+            android:layout_width="296dp"
+            android:layout_height="296dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="116dp"
+            android:text="Descrição"
+            android:textAlignment="center"
+            android:textSize="30sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ivProduct" />
+
+        <ImageView
+            android:id="@+id/ivProduct"
+            android:layout_width="278dp"
+            android:layout_height="260dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="108dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView"
+            app:srcCompat="@color/cast_expanded_controller_ad_container_white_stripe_color" />
 
     </android.support.constraint.ConstraintLayout>
 

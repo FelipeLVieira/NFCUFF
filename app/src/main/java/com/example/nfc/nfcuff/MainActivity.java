@@ -1,15 +1,22 @@
 package com.example.nfc.nfcuff;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
 
@@ -22,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     private TextView title = null;
     private TextView txtTagContent = null;
     private Switch tagContentSwitch = null;
+    private ImageView ivProduct = null;
 
     //Managers
     private NfcManager nfcManager = new NfcManager(this);
@@ -42,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         txtTagContent = findViewById(R.id.txtTagConent);
         tagContentSwitch = findViewById(R.id.tagContentSwitch);
         tagContentSwitch.setOnCheckedChangeListener(this);
+        ivProduct = findViewById(R.id.ivProduct);
 
         //Verificar se o dispositivo possui suporte a NFC
         try {
@@ -131,6 +140,16 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 "\n Build Fingerprint: " + firebaseDeviceAndTagData.getBuildFingerprint() +
                 "\n Date: " + System.currentTimeMillis());
 
+
+
+        String imageURL = firebaseDeviceAndTagData.getTagData().getContent();
+
+        //Pegar a URL referente ao ID do produto
+        if(firebaseDeviceAndTagData.getTagData().getContent().equals("A1707")){
+            new DownloadImageFromInternet(ivProduct)
+                    .execute("https://everymac.com/images/cpu_pictures/macbook-pro-15-touch-bar-top.jpg");
+        };
+
         //É chamado o Firebase manager para efetuar a persistência dos dados da leitura
         firebaseManager.storeNfcTagDataOnFirebase(firebaseDeviceAndTagData);
 
@@ -159,6 +178,33 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         if (nfcManager == null || firebaseManager == null) {
             nfcManager = new NfcManager(this);
             firebaseManager = new FirebaseManager(this);
+        }
+    }
+
+    private class DownloadImageFromInternet extends AsyncTask<String, Void, Bitmap> {
+        ImageView imageView;
+
+        public DownloadImageFromInternet(ImageView imageView) {
+            this.imageView = imageView;
+            Toast.makeText(getApplicationContext(), "Please wait, it may take a few minute...", Toast.LENGTH_SHORT).show();
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            String imageURL = urls[0];
+            Bitmap bimage = null;
+            try {
+                InputStream in = new java.net.URL(imageURL).openStream();
+                bimage = BitmapFactory.decodeStream(in);
+
+            } catch (Exception e) {
+                Log.e("Error Message", e.getMessage());
+                e.printStackTrace();
+            }
+            return bimage;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            imageView.setImageBitmap(result);
         }
     }
 }
