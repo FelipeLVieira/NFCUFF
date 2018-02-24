@@ -16,6 +16,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
@@ -27,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     //Elementos da Tela
     private TextView title = null;
+    private TextView txtDescription = null;
     private TextView txtTagContent = null;
     private Switch tagContentSwitch = null;
     private ImageView ivProduct = null;
@@ -47,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
         //Referências dos objetos da activity
         title = findViewById(R.id.txtTitle);
+        txtDescription = findViewById(R.id.txtDescription);
         txtTagContent = findViewById(R.id.txtTagConent);
         tagContentSwitch = findViewById(R.id.tagContentSwitch);
         tagContentSwitch.setOnCheckedChangeListener(this);
@@ -72,8 +76,14 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 "onResume()",
                 Toast.LENGTH_SHORT).show();
 
-        getAdapter();
-        nfcManager.setupForegroundDispatch(this);
+        try {
+            //Verificar o adaptador do
+            getAdapter();
+            //Habilitar o ForegroundDispatch
+            nfcManager.setupForegroundDispatch(this);
+        } catch (Exception ex){
+            txtTagContent.setText("getAdapter() or setupForgroundDispatch exception.");
+        }
     }
 
     @Override
@@ -84,8 +94,12 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 "onPause()",
                 Toast.LENGTH_SHORT).show();
 
-        //Desabilitar o ForegroundDispatch
-        nfcManager.disableDispatch();
+        try {
+            //Desabilitar o ForegroundDispatch
+            nfcManager.disableDispatch();
+        } catch (Exception ex) {
+            txtTagContent.setText("disableDispatch exception.");
+        }
     }
 
 
@@ -97,8 +111,12 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 "onNewIntent()",
                 Toast.LENGTH_SHORT).show();
 
-        //Intent com os dados do NFC é enviada para o método de tratamento
-        handleIntent(intent);
+        try {
+            //Intent com os dados do NFC é enviada para o método de tratamento
+            handleIntent(intent);
+        } catch (Exception ex){
+            txtTagContent.setText("handleIntent exception.");
+        }
     }
 
     private void handleIntent(Intent intent) {
@@ -144,11 +162,21 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
         String imageURL = firebaseDeviceAndTagData.getTagData().getContent();
 
-        //Pegar a URL referente ao ID do produto
-        if(firebaseDeviceAndTagData.getTagData().getContent().equals("A1707")){
-            new DownloadImageFromInternet(ivProduct)
-                    .execute("https://everymac.com/images/cpu_pictures/macbook-pro-15-touch-bar-top.jpg");
-        };
+        //Pegar a URL da imagem referente ao ID do produto bem como a descrição
+        switch(firebaseDeviceAndTagData.getTagData().getContent()){
+            case "A1707":
+                new DownloadImageFromInternet(ivProduct)
+                        .execute("https://everymac.com/images/cpu_pictures/macbook-pro-15-touch-bar-top.jpg");
+                txtDescription.setText("Apple MacBook Pro Core i7 3.1 GHz 15 in., Processors: 1 (4 Cores), Architecture:64-Bit, RAM: 16GB, SSD: 512GB");
+                break;
+            case "IPHONEX":
+                new DownloadImageFromInternet(ivProduct)
+                        .execute("https://www.theiphonewiki.com/w/images/thumb/c/cd/IPhone_X.png/225px-IPhone_X.png");
+                txtDescription.setText("Battery Specs Current: 2716 mA Power: 10.35 Whr Voltage: 3.81 V Bluetooth 5.0 Camera Specs: Front: 7 megapixels Rear: 2×12.2 megapixels[10] / 4k-2160p30[11], 1080p30, 1080p60[8] video / 1080p120[8], 720p240[6] slow-motion video Cellular Radio: Up to LTE (4G) Colors: Silver, Space Gray CPU Specs: Core Design: Apple Monsoon x 2 and Apple Mistral x 4 CPU: T8015 \"A11\" CPU Speed: 2.39 GHz Instruction Set: ARMv8 Firmware: Initial firmware: 11.0.1 (15A8391) Latest publicly available firmware: 11.2.6 (15D60), 11.2.6 (15D60) Latest firmware: 11.3 beta 3 (15E5189f), 11.3 beta 3 (15E5189f) Internal Name: iPhone10,3, iPhone10,6 RAM: 3 GB Storage: 64/256 GB Wi-Fi: 802.11ac with MIMO");
+                break;
+            default:
+                txtDescription.setText("Insira uma tag válida.");
+        }
 
         //É chamado o Firebase manager para efetuar a persistência dos dados da leitura
         firebaseManager.storeNfcTagDataOnFirebase(firebaseDeviceAndTagData);
