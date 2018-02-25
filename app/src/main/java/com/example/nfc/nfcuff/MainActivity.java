@@ -159,24 +159,9 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 "\n Date: " + System.currentTimeMillis());
 
 
-
-        String imageURL = firebaseDeviceAndTagData.getTagData().getContent();
-
         //Pegar a URL da imagem referente ao ID do produto bem como a descrição
-        switch(firebaseDeviceAndTagData.getTagData().getContent()){
-            case "A1707":
-                new DownloadImageFromInternet(ivProduct)
-                        .execute("https://everymac.com/images/cpu_pictures/macbook-pro-15-touch-bar-top.jpg");
-                txtDescription.setText("Apple MacBook Pro Core i7 3.1 GHz 15 in., Processors: 1 (4 Cores), Architecture:64-Bit, RAM: 16GB, SSD: 512GB");
-                break;
-            case "IPHONEX":
-                new DownloadImageFromInternet(ivProduct)
-                        .execute("https://www.theiphonewiki.com/w/images/thumb/c/cd/IPhone_X.png/225px-IPhone_X.png");
-                txtDescription.setText("Battery Specs Current: 2716 mA Power: 10.35 Whr Voltage: 3.81 V Bluetooth 5.0 Camera Specs: Front: 7 megapixels Rear: 2×12.2 megapixels[10] / 4k-2160p30[11], 1080p30, 1080p60[8] video / 1080p120[8], 720p240[6] slow-motion video Cellular Radio: Up to LTE (4G) Colors: Silver, Space Gray CPU Specs: Core Design: Apple Monsoon x 2 and Apple Mistral x 4 CPU: T8015 \"A11\" CPU Speed: 2.39 GHz Instruction Set: ARMv8 Firmware: Initial firmware: 11.0.1 (15A8391) Latest publicly available firmware: 11.2.6 (15D60), 11.2.6 (15D60) Latest firmware: 11.3 beta 3 (15E5189f), 11.3 beta 3 (15E5189f) Internal Name: iPhone10,3, iPhone10,6 RAM: 3 GB Storage: 64/256 GB Wi-Fi: 802.11ac with MIMO");
-                break;
-            default:
-                txtDescription.setText("Insira uma tag válida.");
-        }
+        firebaseManager.setImageURLfromFirebase(firebaseDeviceAndTagData.getTagData().getContent(), this, ivProduct);
+        firebaseManager.writeFromFirebase(firebaseDeviceAndTagData.getTagData().getContent(), this, txtDescription);
 
         //É chamado o Firebase manager para efetuar a persistência dos dados da leitura
         firebaseManager.storeNfcTagDataOnFirebase(firebaseDeviceAndTagData);
@@ -206,33 +191,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         if (nfcManager == null || firebaseManager == null) {
             nfcManager = new NfcManager(this);
             firebaseManager = new FirebaseManager(this);
-        }
-    }
-
-    private class DownloadImageFromInternet extends AsyncTask<String, Void, Bitmap> {
-        ImageView imageView;
-
-        public DownloadImageFromInternet(ImageView imageView) {
-            this.imageView = imageView;
-            Toast.makeText(getApplicationContext(), "Please wait, it may take a few minute...", Toast.LENGTH_SHORT).show();
-        }
-
-        protected Bitmap doInBackground(String... urls) {
-            String imageURL = urls[0];
-            Bitmap bimage = null;
-            try {
-                InputStream in = new java.net.URL(imageURL).openStream();
-                bimage = BitmapFactory.decodeStream(in);
-
-            } catch (Exception e) {
-                Log.e("Error Message", e.getMessage());
-                e.printStackTrace();
-            }
-            return bimage;
-        }
-
-        protected void onPostExecute(Bitmap result) {
-            imageView.setImageBitmap(result);
         }
     }
 }
