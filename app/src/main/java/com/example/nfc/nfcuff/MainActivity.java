@@ -24,8 +24,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     //Constantes
     public static final String MIME_TEXT_PLAIN = "text/plain";
-    public static final String TAG = "NfcDemo";
-    public static final String EXTRA_MESSAGE = "com.example.nfc.nfcuff.MESSAGE";
 
     //Elementos da Tela
     private TextView title = null;
@@ -37,6 +35,8 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     //Managers
     private NfcManager nfcManager = new NfcManager(this);
     private FirebaseManager firebaseManager = new FirebaseManager(this);
+
+    FirebaseDeviceAndTagData firebaseDeviceAndTagData = null;
 
 
     @Override
@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             //Habilitar o ForegroundDispatch
             nfcManager.setupForegroundDispatch(this);
         } catch (Exception ex){
-            txtTagContent.setText("getAdapter() or setupForgroundDispatch exception.");
+            txtTagContent.setText("Try getAdapter() or setupForgroundDispatch exception. Message: " + ex.getMessage());
         }
     }
 
@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             //Desabilitar o ForegroundDispatch
             nfcManager.disableDispatch();
         } catch (Exception ex) {
-            txtTagContent.setText("disableDispatch exception.");
+            txtTagContent.setText("Try disableDispatch exception. Message: " + ex.getMessage());
         }
     }
 
@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             //Intent com os dados do NFC é enviada para o método de tratamento
             handleIntent(intent);
         } catch (Exception ex){
-            txtTagContent.setText("handleIntent exception.");
+            txtTagContent.setText("Try handleIntent exception. Message: " + ex.getMessage());
         }
     }
 
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         TagData tagData = nfcManager.getTextContentFromTag(intent);
 
         //É chamado o construtor do objeto de leitura e são passadas todas as informações que serão persistidas
-        FirebaseDeviceAndTagData firebaseDeviceAndTagData = new FirebaseDeviceAndTagData(deviceUniqueId,
+        firebaseDeviceAndTagData = new FirebaseDeviceAndTagData(deviceUniqueId,
                 tagData, Build.VERSION.RELEASE,
                 Build.MODEL, Build.ID, Build.MANUFACTURER, Build.BRAND,
                 Build.TYPE, Build.USER, Build.VERSION.SDK,
@@ -165,11 +165,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
         //É chamado o Firebase manager para efetuar a persistência dos dados da leitura
         firebaseManager.storeNfcTagDataOnFirebase(firebaseDeviceAndTagData);
-
-        //Enviar para a activity com os detalhes do produto
-        /*Intent displayIntent = new Intent(this, DisplayProductActivity.class);
-        intent.putExtra(EXTRA_MESSAGE, tagData.content);
-        startActivity(displayIntent);*/
     }
 
 
