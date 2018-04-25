@@ -1,4 +1,4 @@
-package com.example.nfc.nfcuff;
+package com.example.nfc.nfcuff.Model;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 

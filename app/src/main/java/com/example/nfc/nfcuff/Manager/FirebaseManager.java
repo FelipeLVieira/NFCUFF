@@ -1,4 +1,4 @@
-package com.example.nfc.nfcuff;
+package com.example.nfc.nfcuff.Manager;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.nfc.nfcuff.Model.FirebaseDeviceAndTagData;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -106,7 +107,7 @@ public class FirebaseManager {
                 .getReference("parameters/lastProductRead").setValue(productID);
     }
 
-    public void setImageURLfromFirebase(String childID, Activity activityMain, ImageView imageView){
+    public void setImageURLfromFirebase(final String childID, final Activity activityMain, final ImageView imageView){
 
         DatabaseReference jSettingsDatabase = FirebaseDatabase.getInstance().getReference("products");
 
@@ -134,7 +135,7 @@ public class FirebaseManager {
         }
     }
 
-    public void writeFromFirebase(String childID, Activity activityMain, TextView textView){
+    public void writeFromFirebase(final String childID, final Activity activityMain, final TextView textView){
 
         DatabaseReference jSettingsDatabase = FirebaseDatabase.getInstance().getReference("products");
 

@@ -1,4 +1,4 @@
-package com.example.nfc.nfcuff;
+package com.example.nfc.nfcuff.Model;
 
 /**
  * Created by felip on 17/11/2017.

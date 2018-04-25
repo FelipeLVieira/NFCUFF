@@ -1,4 +1,4 @@
-package com.example.nfc.nfcuff;
+package com.example.nfc.nfcuff.Model;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
@@ -22,6 +22,7 @@ public class FirebaseDeviceAndTagData {
     private String buildBoard = "";
     private String buildFingerprint = "";
     private Long currentTimeMillis = 0l;
+    private String userEmail = "";
 
 
     FirebaseDeviceAndTagData() {
@@ -32,7 +33,7 @@ public class FirebaseDeviceAndTagData {
     public FirebaseDeviceAndTagData(String deviceUniqueID, TagData tagData, String buildVersionRelease,
                                     String buildModel, String buildID, String buildManufacturer,
                                     String buildBrand, String buildType, String buildUser, String buildVersionSDK,
-                                    String buildBoard, String buildFingerprint, Long currentTimeMillis) {
+                                    String buildBoard, String buildFingerprint, Long currentTimeMillis, String userEmail) {
         this.deviceUniqueID = deviceUniqueID;
         this.tagData = tagData;
         this.buildVersionRelease = buildVersionRelease;
@@ -46,6 +47,7 @@ public class FirebaseDeviceAndTagData {
         this.buildBoard = buildBoard;
         this.buildFingerprint = buildFingerprint;
         this.currentTimeMillis = currentTimeMillis;
+        this.userEmail = userEmail;
     }
 
     public String getDeviceUniqueID() {
@@ -150,6 +152,14 @@ public class FirebaseDeviceAndTagData {
 
     public void setCurrentTimeMillis(Long currentTimeMillis) {
         this.currentTimeMillis = currentTimeMillis;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 }
 

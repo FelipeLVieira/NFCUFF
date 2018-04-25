@@ -1,14 +1,13 @@
-package com.example.nfc.nfcuff;
+package com.example.nfc.nfcuff.Activity;
 
+import android.accounts.AccountManager;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -16,14 +15,21 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
-import java.io.InputStream;
+import com.example.nfc.nfcuff.Manager.FirebaseManager;
+import com.example.nfc.nfcuff.Manager.NfcManager;
+import com.example.nfc.nfcuff.Model.FirebaseDeviceAndTagData;
+import com.example.nfc.nfcuff.Model.TagData;
+import com.example.nfc.nfcuff.R;
+import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.AccountPicker;
 
 public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
 
     //Constantes
     public static final String MIME_TEXT_PLAIN = "text/plain";
+    Uri EMAIL_ACCOUNTS_DATABASE_CONTENT_URI =
+            Uri.parse("content://com.android.email.provider/account");
 
     //Elementos da Tela
     private TextView title = null;
@@ -37,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     private FirebaseManager firebaseManager = new FirebaseManager(this);
 
     FirebaseDeviceAndTagData firebaseDeviceAndTagData = null;
+    String userEmail;
 
 
     @Override
@@ -56,6 +63,10 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         tagContentSwitch.setOnCheckedChangeListener(this);
         ivProduct = findViewById(R.id.ivProduct);
 
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
         //Verificar se o dispositivo possui suporte a NFC
         try {
             nfcManager.verifyNFC();
@@ -64,6 +75,14 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             txtTagContent.setText("Dispositivo está apto a ler uma tag NFC.");
         } catch (NfcManager.NFCNotEnabled nfcnEn) {
             txtTagContent.setText("Este dispositivo não está habilitado para leitura de NFC.");
+        }
+
+        try {
+            Intent intent = AccountPicker.newChooseAccountIntent(null, null,
+                    new String[] { GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE }, false, null, null, null, null);
+            startActivityForResult(intent, 1);
+        } catch (ActivityNotFoundException e) {
+            // TODO
         }
     }
 
@@ -137,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 tagData, Build.VERSION.RELEASE,
                 Build.MODEL, Build.ID, Build.MANUFACTURER, Build.BRAND,
                 Build.TYPE, Build.USER, Build.VERSION.SDK,
-                Build.BOARD, Build.FINGERPRINT, System.currentTimeMillis());
+                Build.BOARD, Build.FINGERPRINT, System.currentTimeMillis(), userEmail);
 
         //Os dados de leitura que foram salvos no objeto firebaseDeviceAndTagData também são printados numa caixa de texto no app
         txtTagContent.setText("Device Unique ID: " + firebaseDeviceAndTagData.getDeviceUniqueID() +
@@ -156,7 +175,8 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 "\n Version SDK: " + firebaseDeviceAndTagData.getBuildVersionSDK() +
                 "\n Build Board: " + firebaseDeviceAndTagData.getBuildBoard() +
                 "\n Build Fingerprint: " + firebaseDeviceAndTagData.getBuildFingerprint() +
-                "\n Date: " + System.currentTimeMillis());
+                "\n Date: " + System.currentTimeMillis() +
+                "\n User E-mail: " + firebaseDeviceAndTagData.getUserEmail());
 
 
         //Pegar a URL da imagem referente ao ID do produto bem como a descrição
@@ -186,6 +206,14 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         if (nfcManager == null || firebaseManager == null) {
             nfcManager = new NfcManager(this);
             firebaseManager = new FirebaseManager(this);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            userEmail = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+            //email.setText(accountName);
         }
     }
 }

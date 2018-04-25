@@ -1,4 +1,4 @@
-package com.example.nfc.nfcuff;
+package com.example.nfc.nfcuff.Manager;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -11,6 +11,8 @@ import android.nfc.tech.Ndef;
 import android.nfc.tech.NdefFormatable;
 import android.os.Parcelable;
 import android.widget.Toast;
+
+import com.example.nfc.nfcuff.Model.TagData;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;

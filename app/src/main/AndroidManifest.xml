@@ -7,6 +7,9 @@
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission. ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_PROFILE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <uses-feature
         android:name="android.hardware.nfc"
@@ -21,7 +24,7 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".Activity.MainActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -38,8 +41,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".DisplayProductActivity"
-            android:parentActivityName=".MainActivity" >
+        <activity android:name=".Activity.DisplayProductActivity"
+            android:parentActivityName=".Activity.MainActivity" >
         </activity>
 
     </application>
