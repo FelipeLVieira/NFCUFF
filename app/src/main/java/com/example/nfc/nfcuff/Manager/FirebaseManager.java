@@ -47,6 +47,7 @@ public class FirebaseManager {
         DatabaseReference database = FirebaseDatabase.getInstance().getReference("firebaseDeviceAndTagData")
                 .child("Accounts")
                 .child(firebaseDeviceAndTagData.getUserEmail())
+                .child("Devices")
                 .child(firebaseDeviceAndTagData.getDeviceUniqueID())
                 .child("Tags")
                 .child(firebaseDeviceAndTagData.getTagData().getUniqueId())
