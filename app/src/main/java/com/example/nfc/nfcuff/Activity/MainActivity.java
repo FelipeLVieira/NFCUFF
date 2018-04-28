@@ -8,10 +8,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.CompoundButton;
+import android.util.Log;
 import android.widget.ImageView;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,65 +19,63 @@ import com.example.nfc.nfcuff.Model.FirebaseDeviceAndTagData;
 import com.example.nfc.nfcuff.Model.TagData;
 import com.example.nfc.nfcuff.R;
 import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.AccountPicker;
 
-public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
+public class MainActivity extends AppCompatActivity {
 
-    //Constantes
+    /*implements CompoundButton.OnCheckedChangeListener*/
+
+    // Constants
     public static final String MIME_TEXT_PLAIN = "text/plain";
     Uri EMAIL_ACCOUNTS_DATABASE_CONTENT_URI =
             Uri.parse("content://com.android.email.provider/account");
 
-    //Elementos da Tela
-    private TextView title = null;
-    private TextView txtDescription = null;
-    private TextView txtTagContent = null;
-    private Switch tagContentSwitch = null;
-    private ImageView ivProduct = null;
-
-    //Managers
-    private NfcManager nfcManager = new NfcManager(this);
-    private FirebaseManager firebaseManager = new FirebaseManager(this);
-
+    // Model variables
     FirebaseDeviceAndTagData firebaseDeviceAndTagData = null;
     String userEmail;
 
+    // Screen objects
+    private TextView title = null;
+    //private TextView txtTagContent = null;
+    //private Switch tagContentSwitch = null;
+    private TextView txtDescription = null;
+    private ImageView ivProduct = null;
+
+    // Managers
+    private NfcManager nfcManager = new NfcManager(this);
+    private FirebaseManager firebaseManager = new FirebaseManager(this);
 
     @Override
     public void onCreate(Bundle savedState) {
         super.onCreate(savedState);
         setContentView(R.layout.activity_main);
 
-        Toast.makeText(this,
+        /*Toast.makeText(this,
                 "onCreate()",
-                Toast.LENGTH_SHORT).show();
+                Toast.LENGTH_SHORT).show();*/
 
-        //Referências dos objetos da activity
+        //Link objects
         title = findViewById(R.id.txtTitle);
         txtDescription = findViewById(R.id.txtDescription);
-        txtTagContent = findViewById(R.id.txtTagConent);
-        tagContentSwitch = findViewById(R.id.tagContentSwitch);
-        tagContentSwitch.setOnCheckedChangeListener(this);
         ivProduct = findViewById(R.id.ivProduct);
+        //txtTagContent = findViewById(R.id.txtTagConent);
+        //tagContentSwitch = findViewById(R.id.tagContentSwitch);
+        //tagContentSwitch.setOnCheckedChangeListener(this);
 
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-
-        //Verificar se o dispositivo possui suporte a NFC
+        // Verify if the device is NFC ready
         try {
             nfcManager.verifyNFC();
-            txtTagContent.setText("Dispositivo está apto a ler uma tag NFC.");
+            title.setText("Dispositivo está apto a ler uma tag NFC.");
         } catch (NfcManager.NFCNotSupported nfcnsup) {
-            txtTagContent.setText("Dispositivo está apto a ler uma tag NFC.");
+            title.setText("Dispositivo está apto a ler uma tag NFC.");
         } catch (NfcManager.NFCNotEnabled nfcnEn) {
-            txtTagContent.setText("Este dispositivo não está habilitado para leitura de NFC.");
+            title.setText("Este dispositivo não está habilitado para leitura de NFC.");
         }
 
+        // Display the linked Google accounts to the device and let the user pick one
         try {
             Intent intent = AccountPicker.newChooseAccountIntent(null, null,
-                    new String[] { GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE }, false, null, null, null, null);
+                    new String[]{GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE}, false, null, null, null, null);
             startActivityForResult(intent, 1);
         } catch (ActivityNotFoundException e) {
             // TODO
@@ -91,17 +87,24 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     protected void onResume() {
         super.onResume();
 
-        Toast.makeText(this,
+        /*Toast.makeText(this,
                 "onResume()",
-                Toast.LENGTH_SHORT).show();
+                Toast.LENGTH_SHORT).show();*/
 
         try {
-            //Verificar o adaptador do
+            //Verify the NFC adapter
             getAdapter();
             //Habilitar o ForegroundDispatch
+
+        } catch (Exception ex) {
+            title.setText("onResume getAdapter() exception. Message: " + ex.getMessage());
+        }
+
+        try {
+            // Enable foreground dispatch
             nfcManager.setupForegroundDispatch(this);
-        } catch (Exception ex){
-            txtTagContent.setText("Try getAdapter() or setupForgroundDispatch exception. Message: " + ex.getMessage());
+        } catch (Exception e) {
+            Log.e("Catch onResume() error. Message:", e.getMessage());
         }
     }
 
@@ -109,15 +112,15 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     protected void onPause() {
         super.onPause();
 
-        Toast.makeText(this,
+        /*Toast.makeText(this,
                 "onPause()",
-                Toast.LENGTH_SHORT).show();
+                Toast.LENGTH_SHORT).show();*/
 
         try {
-            //Desabilitar o ForegroundDispatch
+            // Disable foreground dispatch
             nfcManager.disableDispatch();
-        } catch (Exception ex) {
-            txtTagContent.setText("Try disableDispatch exception. Message: " + ex.getMessage());
+        } catch (Exception e) {
+            Log.e("Catch onPause() error. Message:", e.getMessage());
         }
     }
 
@@ -126,39 +129,45 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     public void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-        Toast.makeText(this,
+        /*Toast.makeText(this,
                 "onNewIntent()",
-                Toast.LENGTH_SHORT).show();
+                Toast.LENGTH_SHORT).show();*/
 
         try {
-            //Intent com os dados do NFC é enviada para o método de tratamento
+            // Try to handle a new intent from NFC read event
             handleIntent(intent);
-        } catch (Exception ex){
-            txtTagContent.setText("Try handleIntent exception. Message: " + ex.getMessage());
+        } catch (Exception e) {
+            Toast.makeText(this, "TAG inválida.", Toast.LENGTH_SHORT).show();
+            Log.e("Catch onNewIntent() error. Message:", e.getMessage());
         }
     }
 
     private void handleIntent(Intent intent) {
 
-        Toast.makeText(this,
+        /*Toast.makeText(this,
                 "handleIntent()",
-                Toast.LENGTH_SHORT).show();
+                Toast.LENGTH_SHORT).show();*/
 
-
-        //O ID único do dispositivo
+        // Device unique ID
         String deviceUniqueId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        //O conteúdo que foi escrito na tag
+        // Get TAG content
         TagData tagData = nfcManager.getTextContentFromTag(intent);
 
-        //É chamado o construtor do objeto de leitura e são passadas todas as informações que serão persistidas
+        // Create a new read event object and pass the TAG data, device infos
         firebaseDeviceAndTagData = new FirebaseDeviceAndTagData(deviceUniqueId,
                 tagData, Build.VERSION.RELEASE,
                 Build.MODEL, Build.ID, Build.MANUFACTURER, Build.BRAND,
                 Build.TYPE, Build.USER, Build.VERSION.SDK,
                 Build.BOARD, Build.FINGERPRINT, System.currentTimeMillis(), userEmail);
 
-        //Os dados de leitura que foram salvos no objeto firebaseDeviceAndTagData também são printados numa caixa de texto no app
+        //Check if the TAG contains the promotion code
+        if (!firebaseDeviceAndTagData.getTagData().getContent().equals("POSTERTAGNFCUFF")) {
+            Toast.makeText(this, "TAG inválida.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        /*Show read event object info on the android screen
         txtTagContent.setText("Device Unique ID: " + firebaseDeviceAndTagData.getDeviceUniqueID() +
                 "\n Tag Unique ID: " + firebaseDeviceAndTagData.getTagData().getUniqueId() +
                 "\n Tag Content: " + firebaseDeviceAndTagData.getTagData().getContent() +
@@ -176,19 +185,22 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 "\n Build Board: " + firebaseDeviceAndTagData.getBuildBoard() +
                 "\n Build Fingerprint: " + firebaseDeviceAndTagData.getBuildFingerprint() +
                 "\n Date: " + System.currentTimeMillis() +
-                "\n User E-mail: " + firebaseDeviceAndTagData.getUserEmail());
+                "\n User E-mail: " + firebaseDeviceAndTagData.getUserEmail());*/
 
+        //Persist the read event object on Firebase
+        boolean stored = firebaseManager.storeNfcTagDataOnFirebase(firebaseDeviceAndTagData);
 
-        //Pegar a URL da imagem referente ao ID do produto bem como a descrição
-        firebaseManager.setImageURLfromFirebase(firebaseDeviceAndTagData.getTagData().getContent(), this, ivProduct);
-        firebaseManager.writeFromFirebase(firebaseDeviceAndTagData.getTagData().getContent(), this, txtDescription);
+        // Get success image URL and show on screen if stored new user
+        if (stored) {
+            firebaseManager.setImageURLfromFirebase(firebaseDeviceAndTagData.getTagData().getContent(), this, ivProduct);
+            firebaseManager.writeFromFirebase(firebaseDeviceAndTagData.getTagData().getContent(), this, txtDescription);
+        }
 
-        //É chamado o Firebase manager para efetuar a persistência dos dados da leitura
-        firebaseManager.storeNfcTagDataOnFirebase(firebaseDeviceAndTagData);
+        firebaseManager.checkAccountRegistered(firebaseDeviceAndTagData.getUserEmail(), this, txtDescription);
     }
 
 
-    @Override
+    /*@Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
         //Alterar a visibilidade do switch
         switch (compoundButton.getId()) {
@@ -200,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
                 }
                 break;
         }
-    }
+    }*/
 
     private void getAdapter() {
         if (nfcManager == null || firebaseManager == null) {
@@ -211,9 +223,18 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Save selected Google account e-mail in a variable
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            userEmail = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+            userEmail = encodeUserEmail(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
             //email.setText(accountName);
         }
+    }
+
+    String encodeUserEmail(String userEmail) {
+        return userEmail.replace(".", ",");
+    }
+
+    String decodeUserEmail(String userEmail) {
+        return userEmail.replace(",", ".");
     }
 }

@@ -58,7 +58,7 @@ public class NfcManager {
                 Ndef ndefTag = Ndef.get(tag);
 
                 if (ndefTag == null) {
-                    // Let's try to format the Tag in NDEF
+                    // Try to format the Tag in NDEF
                     NdefFormatable nForm = NdefFormatable.get(tag);
                     if (nForm != null) {
                         nForm.connect();

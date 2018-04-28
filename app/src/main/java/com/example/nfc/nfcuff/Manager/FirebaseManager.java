@@ -34,20 +34,25 @@ public class FirebaseManager {
         this.activity = activity;
     }
 
-    public void storeNfcTagDataOnFirebase(FirebaseDeviceAndTagData firebaseDeviceAndTagData) {
+    public boolean storeNfcTagDataOnFirebase(FirebaseDeviceAndTagData firebaseDeviceAndTagData) {
 
-        Toast.makeText(activity,
+        /*Toast.makeText(activity,
                 "storeNfcTagDataOnFirebase()",
-                Toast.LENGTH_SHORT).show();
+                Toast.LENGTH_SHORT).show();*/
 
+        //Check if e-mail account already exists
+
+
+        //Get database reference
         DatabaseReference database = FirebaseDatabase.getInstance().getReference("firebaseDeviceAndTagData")
-                .child("Devices")
+                .child("Accounts")
+                .child(firebaseDeviceAndTagData.getUserEmail())
                 .child(firebaseDeviceAndTagData.getDeviceUniqueID())
                 .child("Tags")
                 .child(firebaseDeviceAndTagData.getTagData().getUniqueId())
                 .child(getDate(System.currentTimeMillis()));
 
-        incrementCounter(firebaseDeviceAndTagData
+        incrementIDCounter(firebaseDeviceAndTagData
                 .getTagData()
                 .getContent());
 
@@ -56,21 +61,30 @@ public class FirebaseManager {
                 .getContent());
 
         database.setValue(firebaseDeviceAndTagData);
+
+        return true;
     }
 
     public String getDate(long timeStamp) {
-
+        SimpleDateFormat sdf = null;
+        Date netDate = null;
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
-            Date netDate = (new Date(timeStamp));
-            return sdf.format(netDate);
-        } catch (Exception ex) {
-            throw ex;
+            sdf = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+            netDate = (new Date(timeStamp));
+
+        } catch (Exception e) {
+            Log.e("Catch getDate() error. Message:", e.getMessage());
         }
+        return sdf.format(netDate);
     }
 
-    public void incrementCounter(String productID) {
+    public void setFalse(boolean var) {
+        var = false;
+    }
+
+    public void incrementIDCounter(final String productID) {
         try {
+
             DatabaseReference ref = FirebaseDatabase.getInstance()
                     .getReference("products")
                     .child(productID)
@@ -80,6 +94,7 @@ public class FirebaseManager {
                 @Override
                 public Transaction.Result doTransaction(MutableData mutableData) {
                     Long value = mutableData.getValue(Long.class);
+
                     if (value == null) {
                         mutableData.setValue(0);
                     } else {
@@ -93,35 +108,34 @@ public class FirebaseManager {
                 public void onComplete(DatabaseError databaseError, boolean b,
                                        DataSnapshot dataSnapshot) {
                 }
-                
+
             });
-        }
-        catch(Exception ex){
-            throw ex;
+        } catch (Exception e) {
+            Log.e("Catch incrementIDCounter() error. Message:", e.getMessage());
         }
     }
 
-    public void insertLastProduct(String productID){
+    public void insertLastProduct(String productID) {
         FirebaseDatabase
                 .getInstance()
                 .getReference("parameters/lastProductRead").setValue(productID);
     }
 
-    public void setImageURLfromFirebase(final String childID, final Activity activityMain, final ImageView imageView){
+    public void setImageURLfromFirebase(final String childID, final Activity activityMain, final ImageView imageView) {
 
-        DatabaseReference jSettingsDatabase = FirebaseDatabase.getInstance().getReference("products");
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("products");
 
         try {
-            jSettingsDatabase.addValueEventListener(new ValueEventListener() {
+            ref.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
 
                     new DownloadImageFromInternet(activityMain, imageView)
                             .execute(dataSnapshot.child(childID).child("image").getValue().toString());
 
-                    Toast.makeText(activityMain,
+                    /*Toast.makeText(activityMain,
                             "Encontrado o ID childNode " + dataSnapshot.child(childID).child("model").getValue(),
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT).show();*/
 
                 }
 
@@ -130,25 +144,25 @@ public class FirebaseManager {
 
                 }
             });
-        }
-        catch (Exception e){
+        } catch (Exception e) {
+            Log.e("Catch setImageURLfromFirebase() error. Message:", e.getMessage());
         }
     }
 
-    public void writeFromFirebase(final String childID, final Activity activityMain, final TextView textView){
+    public void writeFromFirebase(final String childID, final Activity activityMain, final TextView textView) {
 
-        DatabaseReference jSettingsDatabase = FirebaseDatabase.getInstance().getReference("products");
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("products");
 
         try {
-            jSettingsDatabase.addValueEventListener(new ValueEventListener() {
+            ref.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
 
                     textView.setText(dataSnapshot.child(childID).child("description").getValue().toString());
 
-                    Toast.makeText(activityMain,
+                    /*Toast.makeText(activityMain,
                             "Encontrado o ID childNode " + dataSnapshot.child(childID).child("model").getValue(),
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT).show();*/
 
                 }
 
@@ -157,8 +171,39 @@ public class FirebaseManager {
 
                 }
             });
+        } catch (Exception e) {
+            Log.e("Catch writeFromFirebase() error. Message:", e.getMessage());
         }
-        catch (Exception e){
+    }
+
+    public void checkAccountRegistered(final String childID, final Activity activityMain, final TextView textView) {
+
+        DatabaseReference ref = FirebaseDatabase
+                .getInstance()
+                .getReference("firebaseDeviceAndTagData")
+                .child("Accounts");
+
+        try {
+            ref.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    if (dataSnapshot.hasChild(childID)) {
+                        textView.setText("E-mail já cadastrado");
+
+                        Toast.makeText(activityMain,
+                                "E-mail já cadastrado",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        } catch (Exception e) {
+            Log.e("Catch checkAccountRegistered() error. Message:", e.getMessage());
         }
     }
 
@@ -167,7 +212,7 @@ public class FirebaseManager {
 
         public DownloadImageFromInternet(Activity activityMain, ImageView imageView) {
             this.imageView = imageView;
-            Toast.makeText(activityMain, "Please wait, it may take a few minute...", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(activityMain, "Processando...", Toast.LENGTH_SHORT).show();
         }
 
         protected Bitmap doInBackground(String... urls) {
@@ -178,7 +223,7 @@ public class FirebaseManager {
                 bimage = BitmapFactory.decodeStream(in);
 
             } catch (Exception e) {
-                Log.e("Error Message", e.getMessage());
+                Log.e("Catch doInBackground() error. Message:", e.getMessage());
                 e.printStackTrace();
             }
             return bimage;
