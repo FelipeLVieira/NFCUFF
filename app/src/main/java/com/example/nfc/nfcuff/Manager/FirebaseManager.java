@@ -150,7 +150,7 @@ public class FirebaseManager {
         }
     }
 
-    public void writeFromFirebase(final String childID, final Activity activityMain, final TextView textView) {
+    public void writeFromFirebase(final String childID, final String userEmail, final Activity activityMain, final TextView textView) {
 
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("products");
 
@@ -158,13 +158,12 @@ public class FirebaseManager {
             ref.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-
                     textView.setText(dataSnapshot.child(childID).child("description").getValue().toString());
 
                     /*Toast.makeText(activityMain,
                             "Encontrado o ID childNode " + dataSnapshot.child(childID).child("model").getValue(),
                             Toast.LENGTH_SHORT).show();*/
-
+                    checkAccountAlreadyRegistered(userEmail, activityMain, textView);
                 }
 
                 @Override
@@ -177,7 +176,7 @@ public class FirebaseManager {
         }
     }
 
-    public void checkAccountRegistered(final String childID, final Activity activityMain, final TextView textView) {
+    public void checkAccountAlreadyRegistered(final String childID, final Activity activityMain, final TextView textView) {
 
         DatabaseReference ref = FirebaseDatabase
                 .getInstance()
@@ -204,7 +203,7 @@ public class FirebaseManager {
                 }
             });
         } catch (Exception e) {
-            Log.e("Catch checkAccountRegistered() error. Message:", e.getMessage());
+            Log.e("Catch checkAccountAlreadyRegistered() error. Message:", e.getMessage());
         }
     }
 
@@ -217,6 +216,7 @@ public class FirebaseManager {
         }
 
         protected Bitmap doInBackground(String... urls) {
+            //Load image URL
             String imageURL = urls[0];
             Bitmap bimage = null;
             try {

@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE}, false, null, null, null, null);
             startActivityForResult(intent, 1);
         } catch (ActivityNotFoundException e) {
-            // TODO
+            Log.e("Catch onCreate() error. Message:", e.getMessage());
         }
     }
 
@@ -193,10 +193,11 @@ public class MainActivity extends AppCompatActivity {
         // Get success image URL and show on screen if stored new user
         if (stored) {
             firebaseManager.setImageURLfromFirebase(firebaseDeviceAndTagData.getTagData().getContent(), this, ivProduct);
-            firebaseManager.writeFromFirebase(firebaseDeviceAndTagData.getTagData().getContent(), this, txtDescription);
+            firebaseManager.writeFromFirebase(firebaseDeviceAndTagData.getTagData().getContent(),
+                    firebaseDeviceAndTagData.getUserEmail(),
+                    this, txtDescription);
         }
 
-        firebaseManager.checkAccountRegistered(firebaseDeviceAndTagData.getUserEmail(), this, txtDescription);
     }
 
 
