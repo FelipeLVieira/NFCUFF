@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE}, false, null, null, null, null);
             startActivityForResult(intent, 1);
         } catch (ActivityNotFoundException e) {
-            Log.e("Catch onCreate() error. Message:", e.getMessage());
+            Log.e("Catch onCreate().", e.getMessage());
         }
     }
 
@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             //Verify the NFC adapter
             getAdapter();
-            //Habilitar o ForegroundDispatch
+            //Enable o ForegroundDispatch
 
         } catch (Exception ex) {
             title.setText("onResume getAdapter() exception. Message: " + ex.getMessage());
@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
             // Enable foreground dispatch
             nfcManager.setupForegroundDispatch(this);
         } catch (Exception e) {
-            Log.e("Catch onResume() error. Message:", e.getMessage());
+            Log.e("Catch onResume().", e.getMessage());
         }
     }
 
@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
             // Disable foreground dispatch
             nfcManager.disableDispatch();
         } catch (Exception e) {
-            Log.e("Catch onPause() error. Message:", e.getMessage());
+            Log.e("Catch onPause().", e.getMessage());
         }
     }
 
@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
             handleIntent(intent);
         } catch (Exception e) {
             Toast.makeText(this, "TAG inválida.", Toast.LENGTH_SHORT).show();
-            Log.e("Catch onNewIntent() error. Message:", e.getMessage());
+            Log.e("Catch onNewIntent().", e.getMessage());
         }
     }
 
