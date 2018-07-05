@@ -53,9 +53,7 @@ public class FirebaseManager {
                 .child(firebaseDeviceAndTagData.getTagData().getUniqueId())
                 .child(getDate(System.currentTimeMillis()));
 
-        incrementIDCounter(firebaseDeviceAndTagData
-                .getTagData()
-                .getContent());
+        incrementIDCounter("POSTERTAGNFCUFF");
 
         insertLastProduct(firebaseDeviceAndTagData
                 .getTagData()
@@ -74,7 +72,7 @@ public class FirebaseManager {
             netDate = (new Date(timeStamp));
 
         } catch (Exception e) {
-            Log.e("Catch getDate() error. Message:", e.getMessage());
+            Log.e("Get date excpt.", e.getMessage());
         }
         return sdf.format(netDate);
     }
@@ -112,7 +110,7 @@ public class FirebaseManager {
 
             });
         } catch (Exception e) {
-            Log.e("Catch incrementIDCounter() error. Message:", e.getMessage());
+            Log.e("Increment excpt.", e.getMessage());
         }
     }
 
@@ -131,8 +129,9 @@ public class FirebaseManager {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
 
+                    //POSTERTAGNFCUFF node in Firebase has the reference for the image
                     new DownloadImageFromInternet(activityMain, imageView)
-                            .execute(dataSnapshot.child(childID).child("image").getValue().toString());
+                            .execute(dataSnapshot.child("POSTERTAGNFCUFF").child("image").getValue().toString());
 
                     /*Toast.makeText(activityMain,
                             "Encontrado o ID childNode " + dataSnapshot.child(childID).child("model").getValue(),
@@ -146,7 +145,7 @@ public class FirebaseManager {
                 }
             });
         } catch (Exception e) {
-            Log.e("Catch setImageURLfromFirebase() error. Message:", e.getMessage());
+            Log.e("Set image URL excpt.", e.getMessage());
         }
     }
 
@@ -158,12 +157,8 @@ public class FirebaseManager {
             ref.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    textView.setText(dataSnapshot.child(childID).child("description").getValue().toString());
-
-                    /*Toast.makeText(activityMain,
-                            "Encontrado o ID childNode " + dataSnapshot.child(childID).child("model").getValue(),
-                            Toast.LENGTH_SHORT).show();*/
-                    checkAccountAlreadyRegistered(userEmail, activityMain, textView);
+                    //POSTERTAGNFCUFF node in Firebase has the reference for the description
+                    textView.setText(dataSnapshot.child("POSTERTAGNFCUFF").child("description").getValue().toString());
                 }
 
                 @Override
@@ -172,38 +167,7 @@ public class FirebaseManager {
                 }
             });
         } catch (Exception e) {
-            Log.e("Catch writeFromFirebase() error. Message:", e.getMessage());
-        }
-    }
-
-    public void checkAccountAlreadyRegistered(final String childID, final Activity activityMain, final TextView textView) {
-
-        DatabaseReference ref = FirebaseDatabase
-                .getInstance()
-                .getReference("firebaseDeviceAndTagData")
-                .child("Accounts");
-
-        try {
-            ref.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-
-                    if (dataSnapshot.hasChild(childID)) {
-                        textView.setText("E-mail já cadastrado");
-
-                        Toast.makeText(activityMain,
-                                "E-mail já cadastrado",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        } catch (Exception e) {
-            Log.e("Catch checkAccountAlreadyRegistered() error. Message:", e.getMessage());
+            Log.e("Write Firebase excpt.", e.getMessage());
         }
     }
 
@@ -224,7 +188,7 @@ public class FirebaseManager {
                 bimage = BitmapFactory.decodeStream(in);
 
             } catch (Exception e) {
-                Log.e("Catch doInBackground() error. Message:", e.getMessage());
+                Log.e("Loading bitmap excpt.", e.getMessage());
                 e.printStackTrace();
             }
             return bimage;

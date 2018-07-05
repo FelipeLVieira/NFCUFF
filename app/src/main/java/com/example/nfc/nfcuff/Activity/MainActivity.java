@@ -161,11 +161,11 @@ public class MainActivity extends AppCompatActivity {
                 Build.TYPE, Build.USER, Build.VERSION.SDK,
                 Build.BOARD, Build.FINGERPRINT, System.currentTimeMillis(), userEmail);
 
-        //Check if the TAG contains the promotion code
+        /*Check if the TAG contains the promotion code
         if (!firebaseDeviceAndTagData.getTagData().getContent().equals("POSTERTAGNFCUFF")) {
             Toast.makeText(this, "TAG inválida.", Toast.LENGTH_SHORT).show();
             return;
-        }
+        }*/
 
         /*Show read event object info on the android screen
         txtTagContent.setText("Device Unique ID: " + firebaseDeviceAndTagData.getDeviceUniqueID() +
